@@ -66,6 +66,7 @@
         rows.forEach(row => {
           const c = row.c;
           if (c && c[0] && c[1]) {
+            // A sütunu = Ürün Adı, B sütunu = Kategori
             const name = c[0].v ? c[0].v.toString().trim() : '';
             const category = c[1].v ? c[1].v.toString().trim().toUpperCase() : 'GENEL';
             const price = c[2] ? c[2].v : '0';
@@ -158,7 +159,6 @@
       });
 
       renderCatalog(filtered);
-      // Arama yapılırken kategorileri otomatik aç
       document.querySelectorAll(".subcategory-list").forEach(el => el.classList.add("active"));
     }
 
