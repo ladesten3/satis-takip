@@ -629,7 +629,7 @@
           <div class="report-item" onclick="showVisitModal(${originalIdx})">
             <div class="report-header"><span>👤 Danışman: <strong>${v.danisman}</strong> | Müşteri: ${v.musteri}</span><span>${v.durum}</span></div>
             <div style="color:#334155; margin:4px 0;">Not: ${v.notlar}</div>
-            <div style="font-size:11px; color:var(--text-muted);">Teklif: ${v.fiyat || 'Yok'} | Tarih: ${v.tarih}</div>
+            <div style="font-size:11px; color:var(--text-muted);">Teklif: ${v.fiyat ? (v.fiyat.includes('TL') ? v.fiyat : formatMoney(v.fiyat)) : 'Yok'} | Tarih: ${v.tarih}</div>
           </div>
         `;
       }).join('');
@@ -685,12 +685,23 @@
       if (!v) return;
       const custObj = customers.find(c => c.name === v.musteri) || {};
 
+      // Fiyatı formatlı gösterelim (Zaten TL içeriyorsa direkt, içermiyorsa formatMoney ile)
+      let formattedPrice = 'Teklif Verilmedi';
+      if (v.fiyat) {
+        if (v.fiyat.includes('TL')) {
+          const numericVal = parseFloat(v.fiyat);
+          formattedPrice = isNaN(numericVal) ? v.fiyat : formatMoney(numericVal);
+        } else {
+          formattedPrice = formatMoney(v.fiyat);
+        }
+      }
+
       const content = `
         <div class="detail-row"><div class="detail-label">MÜŞTERİ / FİRMA ADI</div><div class="detail-value">🏢 ${v.musteri}</div></div>
         <div class="detail-row"><div class="detail-label">FİRMA TELEFONU</div><div class="detail-value">📞 ${custObj.phone || 'Telefon Yok'}</div></div>
         <div class="detail-row"><div class="detail-label">SATIŞ DANIŞMANI</div><div class="detail-value">👤 ${v.danisman}</div></div>
         <div class="detail-row"><div class="detail-label">GÖRÜŞME DURUMU</div><div class="detail-value">${v.durum}</div></div>
-        <div class="detail-row"><div class="detail-label">TEKLİF TUTARI</div><div class="detail-value" style="color:var(--success);">${v.fiyat || 'Teklif Verilmedi'}</div></div>
+        <div class="detail-row"><div class="detail-label">TEKLİF TUTARI</div><div class="detail-value" style="color:var(--success);">${formattedPrice}</div></div>
         <div class="detail-row"><div class="detail-label">GÖRÜŞME NOTLARI & DETAY</div><div class="detail-value" style="background:#f8fafc; padding:10px; border-radius:8px; font-weight:normal;">${v.notlar}</div></div>
         <div class="detail-row"><div class="detail-label">İŞLEM TARİHİ</div><div class="detail-value" style="font-size:12px; color:var(--text-muted);">🕒 ${v.tarih}</div></div>
       `;
@@ -940,7 +951,7 @@
       if (!deliveryDate) { alert('Lütfen planlanan teslimat tarihini seçin.'); return; }
       
       let baseSum = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-      const isKdvDahil = document.getElementById('kdvCheck').checked;
+      const isKdvDahil = document.getElementById('kdvCheck'].checked;
       const finalTotal = isKdvDahil ? (baseSum * 1.20) : baseSum;
 
       const ozet = cart.map(i => `${i.name} (${i.qty} Adet)`).join(', ');
