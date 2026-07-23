@@ -230,7 +230,7 @@
 
   <div id="myOrdersTab" class="tab-content">
     <div class="card">
-      <div class="card-title">📦 Verilen Siparişler & Sevkiyat Takibi <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">(Düzenlemek için tıklayın)</span></div>
+      <div class="card-title">📦 Verilen Siparişler & Sevkiyat Takibi <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">(Düzenlemek/İptal için tıklayın)</span></div>
       <div id="myOrdersList"><div class="loading">Yükleniyor...</div></div>
     </div>
   </div>
@@ -788,21 +788,60 @@
     function showOrderEditModal(idx) {
       const s = salesData[idx];
       if (!s) return;
-      const sheetRowNumber = idx + 2; // Başlık satırı + 1 tablodaki index farkı
+      const sheetRowNumber = idx + 2; 
 
       const content = `
         <div class="detail-row"><div class="detail-label">MÜŞTERİ</div><div class="detail-value">🏢 ${s.musteri}</div></div>
-        <div class="detail-row"><div class="detail-label">MEVCUT SİPARİŞ</div><div class="detail-value" style="color:var(--success);">${s.ozet}</div></div>
-        <div class="detail-row"><div class="detail-label">TOPLAM TUTAR</div><div class="detail-value" style="font-weight:bold; font-size:16px;">${formatMoney(s.tutar)}</div></div>
-        <div class="detail-row"><div class="detail-label">TESLİMAT TARİHİ</div><div class="detail-value">🚚 ${s.teslimatTarihi}</div></div>
         
-        <div style="background:#f8fafc; padding:15px; border-radius:12px; border:1px solid var(--border-color); margin-top:15px;">
-          <h4 style="font-size:13px; margin-bottom:8px; color:var(--text-main);">⚠️ Sipariş İptali veya Güncelleme</h4>
-          <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Müşteri üründe değişiklik yapmak veya siparişi iptal etmek istiyorsa bu kaydı silebilir, ardından **Sipariş Ver** sekmesinden güncel halini tekrar girebilirsiniz.</p>
-          <button class="btn-main btn-danger" onclick="deleteOrder(${sheetRowNumber})">🗑️ Bu Siparişi Komple İptal Et / Sil</button>
+        <div style="background:#f8fafc; padding:15px; border-radius:12px; border:1px solid var(--border-color); margin-bottom:15px;">
+          <h4 style="font-size:13px; margin-bottom:10px; color:var(--text-main);">✏️ Siparişi Güncelle (Ürün & Tutar)</h4>
+          <div class="form-group">
+            <label>Ürün Özeti / İçeriği</label>
+            <input type="text" id="editOrderOzet" class="form-control" value="${s.ozet}">
+          </div>
+          <div class="form-group">
+            <label>Toplam Tutar (TL)</label>
+            <input type="number" id="editOrderTutar" class="form-control" value="${s.tutar}">
+          </div>
+          <div class="form-group">
+            <label>Teslimat Tarihi</label>
+            <input type="date" id="editOrderDate" class="form-control" value="${s.teslimatTarihi !== 'Belirtilmedi' ? s.teslimatTarihi : ''}">
+          </div>
+          <button class="btn-main" onclick="updateOrder(${sheetRowNumber})">Değişiklikleri Kaydet & Güncelle</button>
+        </div>
+
+        <div style="background:#fff5f5; padding:15px; border-radius:12px; border:1px solid #feb2b2;">
+          <h4 style="font-size:13px; margin-bottom:8px; color:#c53030;">🗑️ Siparişi Tamamen İptal Et</h4>
+          <p style="font-size:12px; color:#718096; margin-bottom:10px;">Müşteri siparişten tamamen vazgeçtiyse bu butonla siparişi ve ciro kaydını silebilirsiniz.</p>
+          <button class="btn-main btn-danger" onclick="deleteOrder(${sheetRowNumber})">Siparişi Komple İptal Et / Sil</button>
         </div>
       `;
-      openModal('📦 Sipariş Düzenleme & İptal', content);
+      openModal('📦 Sipariş Düzenleme & İptal Yönetimi', content);
+    }
+
+    async function updateOrder(rowNum) {
+      const ozet = document.getElementById('editOrderOzet').value.trim();
+      const tutar = document.getElementById('editOrderTutar').value.trim();
+      const teslimatTarihi = document.getElementById('editOrderDate').value.trim();
+
+      if (!ozet || !tutar) { alert('Ürün özeti ve tutar boş bırakılamaz.'); return; }
+
+      const queryParams = new URLSearchParams({
+        action: 'updateSale',
+        row: rowNum,
+        tutar: tutar,
+        ozet: ozet,
+        teslimatTarihi: teslimatTarihi || 'Belirtilmedi'
+      }).toString();
+
+      try {
+        await fetch(`${appsScriptUrl}?${queryParams}`);
+        alert('Sipariş başarıyla güncellendi!');
+        closeModal();
+        loadSales();
+      } catch(err) {
+        alert('Güncelleme sırasında hata oluştu: ' + err);
+      }
     }
 
     async function deleteOrder(rowNum) {
