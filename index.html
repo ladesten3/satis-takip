@@ -12,7 +12,6 @@
     .user-bar { display: flex; justify-content: space-between; align-items: center; background: #1e293b; color: white; padding: 10px 15px; border-radius: 10px; margin-bottom: 15px; font-size: 14px; }
     .user-bar select { padding: 6px 12px; border-radius: 6px; border: none; font-weight: bold; background: #334155; color: white; cursor: pointer; }
 
-    /* Navigasyon Sekmeleri */
     .nav-tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 5px; border-radius: 12px; overflow-x: auto; }
     .nav-btn { flex: 1; min-width: 120px; padding: 12px 8px; border: none; background: transparent; font-size: 13px; font-weight: 700; color: #64748b; cursor: pointer; border-radius: 8px; transition: all 0.2s; text-align: center; }
     .nav-btn.active { background: white; color: #2563eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
@@ -20,11 +19,9 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Kart Yapıları */
     .card { background: white; padding: 18px; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 20px; }
     .card-title { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
 
-    /* Form Elemanları */
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; text-transform: uppercase; }
     .form-control { width: 100%; padding: 10px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #fff; }
@@ -33,18 +30,15 @@
     .btn-danger { background: #dc2626; color: white; }
     .btn-danger:hover { background: #b91c1c; }
     
-    /* Durum Etiketleri */
     .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
     .badge-olumlu { background: #dcfce7; color: #166534; }
     .badge-olumsuz { background: #fee2e2; color: #991b1b; }
     .badge-teklif { background: #fef3c7; color: #92400e; }
 
-    /* Liste Öğeleri */
     .report-item { padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; background: #f8fafc; font-size: 13px; cursor: pointer; transition: background 0.2s; }
     .report-item:hover { background: #f1f5f9; border-color: #cbd5e1; }
     .report-header { display: flex; justify-content: space-between; margin-bottom: 6px; font-weight: bold; color: #0f172a; }
 
-    /* Kategori ve Ürün Grid */
     .category-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; }
     .pill-btn { padding: 8px 16px; border: 1px solid #cbd5e1; background: white; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; color: #475569; }
     .pill-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
@@ -68,11 +62,9 @@
 
     .loading { text-align: center; font-size: 13px; color: #64748b; padding: 15px; }
 
-    /* Ciro Özet Kartları */
     .revenue-summary-card { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
     .revenue-summary-card .rev-val { font-size: 20px; font-weight: 800; color: #4ade80; }
 
-    /* MODAL (Büyük Detay Ekranı) CSS */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
     .modal-card { background: white; border-radius: 16px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; padding: 22px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); position: relative; animation: modalFadeIn 0.2s ease-out; }
     @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
@@ -89,7 +81,6 @@
     <h2>📊 Saha Satış & CRM Portalı</h2>
   </div>
 
-  <!-- Kullanıcı Seçim Çubuğu -->
   <div class="user-bar">
     <span>Aktif Danışman:</span>
     <select id="currentUserSelect" onchange="changeUser()">
@@ -99,7 +90,6 @@
     </select>
   </div>
 
-  <!-- Navigasyon Sekmeleri -->
   <div class="nav-tabs">
     <button class="nav-btn active" onclick="switchTab('visitTab', this)">📍 Görüşme/Ziyaret</button>
     <button class="nav-btn" onclick="switchTab('customerTab', this)">👤 Müşteriler</button>
@@ -109,16 +99,13 @@
     <button class="nav-btn" id="mudurTabBtn" onclick="switchTab('mudurTab', this)" style="display:none; background:#fef3c7; color:#b45309;">👑 Müdür Raporu</button>
   </div>
 
-  <!-- SEKME 1: ZİYARET RAPORU -->
   <div id="visitTab" class="tab-content active">
     <div class="card">
       <div class="card-title">Müşteri Ziyaret & Görüşme Notu Gir</div>
-      
       <div class="form-group">
         <label>Müşteri Seç *</label>
         <select id="visitCustomerSelect" class="form-control"><option value="">Yükleniyor...</option></select>
       </div>
-
       <div class="form-group">
         <label>Görüşme / Ziyaret Sonucu *</label>
         <select id="visitStatus" class="form-control">
@@ -127,17 +114,14 @@
           <option value="🔴 Olumsuz (Anlaşılmadı)">🔴 Olumsuz (Anlaşılmadı)</option>
         </select>
       </div>
-
       <div class="form-group">
         <label>Verilen Fiyat / Teklif Tutarı (Sadece Sayısal TL, Örn: 15500)</label>
         <input type="number" id="visitPrice" class="form-control" placeholder="Örn: 15500">
       </div>
-
       <div class="form-group">
         <label>Görüşme Detayları & Müşteri Geri Dönüşü *</label>
         <textarea id="visitNotes" class="form-control" rows="3" placeholder="Görüşme detayları..."></textarea>
       </div>
-
       <button class="btn-main" id="btnSaveVisit" onclick="saveVisitReport()">Ziyaret Raporunu Kaydet</button>
     </div>
 
@@ -147,7 +131,6 @@
     </div>
   </div>
 
-  <!-- SEKME 2: MÜŞTERİ YÖNETİMİ -->
   <div id="customerTab" class="tab-content">
     <div class="card">
       <div class="card-title">Yeni Müşteri Kaydı</div>
@@ -173,7 +156,6 @@
     </div>
   </div>
 
-  <!-- SEKME 3: SİPARİŞ OLUŞTUR -->
   <div id="orderTab" class="tab-content">
     <div class="card">
       <div class="card-title">1. Müşteri Seçimi</div>
@@ -188,8 +170,6 @@
 
     <div class="card">
       <div class="card-title">3. Sipariş Kalemleri & KDV Ayarı</div>
-      
-      <!-- TEK KUTUPLU KDV SEÇENEĞİ -->
       <div class="kdv-toggle">
         <label><input type="checkbox" id="kdvCheck" onchange="renderCartTable()"> %20 KDV Dahil Hesapla</label>
       </div>
@@ -218,7 +198,6 @@
     </div>
   </div>
 
-  <!-- SEKME 4: DANIŞMAN CİRO PANELİM -->
   <div id="revenueTab" class="tab-content">
     <div class="revenue-summary-card">
       <div>
@@ -234,20 +213,17 @@
     </div>
   </div>
 
-  <!-- SEKME 5: KATALOG -->
   <div id="catalogTab" class="tab-content">
     <div class="card"><input type="text" id="searchInput" class="form-control" placeholder="Ürün ara..." onkeyup="filterCatalog()"></div>
     <div id="catalogContainer"><div class="loading">Katalog yükleniyor...</div></div>
   </div>
 
-  <!-- SEKME 6: MÜDÜR PANELİ -->
   <div id="mudurTab" class="tab-content">
     <div class="card" style="border: 2px solid #f59e0b; background: #fffbeb;">
       <div class="card-title" style="color: #b45309;">👑 Yönetici Özeti (Gökmen Yorulmaz)</div>
       <p style="font-size:13px; color:#78350f;">Tüm ekibin saha performansını, danışman bazlı ayrıntılı ciroları ve ziyaret akışını görün.</p>
     </div>
 
-    <!-- MERT KİTİR CİRO BÖLÜMÜ -->
     <div class="revenue-summary-card">
       <div>
         <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Mert Kitir - Toplam Ciro</div>
@@ -260,7 +236,6 @@
       <div id="mertSalesList"><div class="loading">Yükleniyor...</div></div>
     </div>
 
-    <!-- VOLKAN YAĞMUR CİRO BÖLÜMÜ -->
     <div class="revenue-summary-card" style="background: linear-gradient(135deg, #0f766e, #115e59);">
       <div>
         <div style="font-size: 12px; color: #99f6e4; text-transform: uppercase; font-weight: 700;">Volkan Yağmur - Toplam Ciro</div>
@@ -279,7 +254,6 @@
     </div>
   </div>
 
-  <!-- POP-UP DETAY EKRANI (MODAL) -->
   <div id="detailModal" class="modal-overlay">
     <div class="modal-card">
       <button class="modal-close" onclick="closeModal()">✕</button>
@@ -383,7 +357,7 @@
 
     async function loadCustomers() {
       try {
-        const res = await fetch(`${appsScriptUrl}?action=getCustomers&danisman=${encodeURIComponent(currentUser)}`);
+        const res = await fetch(`${appsScriptUrl}?action=getCustomers`);
         customers = await res.json();
         renderCustomerList();
         renderCustomerSelect();
@@ -436,7 +410,7 @@
       }).toString();
 
       try {
-        await fetch(`${appsScriptUrl}?${queryParams}`, { method: 'GET', mode: 'no-cors' });
+        await fetch(`${appsScriptUrl}?${queryParams}`);
         alert('Müşteri başarıyla eklendi!');
         document.getElementById('custName').value = '';
         document.getElementById('custPhone').value = '';
@@ -463,7 +437,7 @@
       }).toString();
 
       try {
-        await fetch(`${appsScriptUrl}?${queryParams}`, { method: 'GET', mode: 'no-cors' });
+        await fetch(`${appsScriptUrl}?${queryParams}`);
         alert('Ziyaret raporu kaydedildi!');
         document.getElementById('visitPrice').value = '';
         document.getElementById('visitNotes').value = '';
@@ -475,33 +449,47 @@
     async function loadVisits() {
       const listEl = document.getElementById('visitList');
       try {
-        const res = await fetch(`${appsScriptUrl}?action=getVisits&danisman=${encodeURIComponent(currentUser)}`);
+        const res = await fetch(`${appsScriptUrl}?action=getVisits`);
         visitsData = await res.json();
-        if(!visitsData || visitsData.length === 0) { listEl.innerHTML = '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Görüşme kaydı bulunmuyor.</div>'; return; }
         
-        visitsData.reverse();
-        listEl.innerHTML = visitsData.map((v, idx) => `
-          <div class="report-item" onclick="showVisitModal(${idx})">
-            <div class="report-header">
-              <span>🏢 ${v.musteri}</span>
-              <span class="badge ${v.durum.includes('Olumlu') ? 'badge-olumlu' : v.durum.includes('Teklif') ? 'badge-teklif' : 'badge-olumsuz'}">${v.durum}</span>
+        // Eğer normal danışmansa sadece kendi ziyaretleri, müdürse hepsi
+        let filteredVisits = visitsData;
+        if (currentUser !== 'MUDUR') {
+          filteredVisits = visitsData.filter(v => v.danisman === currentUser);
+        }
+
+        if(!filteredVisits || filteredVisits.length === 0) { 
+          listEl.innerHTML = '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Görüşme kaydı bulunmuyor.</div>'; 
+          return; 
+        }
+        
+        filteredVisits.reverse();
+        listEl.innerHTML = filteredVisits.map((v) => {
+          const originalIdx = visitsData.indexOf(v);
+          return `
+            <div class="report-item" onclick="showVisitModal(${originalIdx})">
+              <div class="report-header">
+                <span>🏢 ${v.musteri} (${v.danisman})</span>
+                <span class="badge ${v.durum.includes('Olumlu') ? 'badge-olumlu' : v.durum.includes('Teklif') ? 'badge-teklif' : 'badge-olumsuz'}">${v.durum}</span>
+              </div>
+              <div style="margin: 6px 0; color:#334155;">💬 <strong>Görüşme Notu:</strong> ${v.notlar}</div>
+              ${v.fiyat ? `<div style="color:#16a34a; font-weight:bold; font-size:12px;">💰 Teklif: ${v.fiyat}</div>` : ''}
+              <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${v.tarih}</div>
             </div>
-            <div style="margin: 6px 0; color:#334155;">💬 <strong>Görüşme Notu:</strong> ${v.notlar}</div>
-            ${v.fiyat ? `<div style="color:#16a34a; font-weight:bold; font-size:12px;">💰 Teklif: ${v.fiyat}</div>` : ''}
-            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${v.tarih} | Danışman: ${v.danisman}</div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
       } catch(e) {}
     }
 
     async function loadSales() {
       if(currentUser === 'MUDUR') return;
       try {
-        const res = await fetch(`${appsScriptUrl}?action=getSales&danisman=MUDUR`);
+        const res = await fetch(`${appsScriptUrl}?action=getSales`);
         salesData = await res.json();
-        salesData.reverse();
-
+        
         const mySales = salesData.filter(s => s.danisman === currentUser);
+        mySales.reverse();
+
         const totalRev = mySales.reduce((sum, s) => sum + (parseFloat(s.tutar) || 0), 0);
         document.getElementById('myTotalRev').innerText = formatMoney(totalRev);
         document.getElementById('myRevTitle').innerText = `${currentUser} - Toplam Ciro`;
@@ -512,13 +500,13 @@
           return;
         }
 
-        listEl.innerHTML = mySales.map((s, idx) => {
+        listEl.innerHTML = mySales.map((s) => {
           const globalIdx = salesData.indexOf(s);
           return `
             <div class="report-item" style="border-left: 4px solid #16a34a;" onclick="showSaleModal(${globalIdx})">
               <div class="report-header"><span>🏢 Müşteri: ${s.musteri}</span><span style="color:#16a34a; font-weight:bold;">${formatMoney(s.tutar)}</span></div>
               <div style="font-size:12px; color:#475569;">📦 Ürünler: ${s.ozet}</div>
-              <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${s.tarih} (Sipariş Formu İçin Tıklayın)</div>
+              <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${s.tarih}</div>
             </div>
           `;
         }).join('');
@@ -530,56 +518,57 @@
       const mertSalesEl = document.getElementById('mertSalesList');
       const volkanSalesEl = document.getElementById('volkanSalesList');
 
-      const resV = await fetch(`${appsScriptUrl}?action=getVisits&danisman=MUDUR`);
+      const resV = await fetch(`${appsScriptUrl}?action=getVisits`);
       visitsData = await resV.json();
-      visitsData.reverse();
+      let revVisits = [...visitsData].reverse();
 
-      visitEl.innerHTML = visitsData.map((v, idx) => `
-        <div class="report-item" onclick="showVisitModal(${idx})">
-          <div class="report-header"><span>👤 Danışman: <strong>${v.danisman}</strong> | Müşteri: ${v.musteri}</span><span>${v.durum}</span></div>
-          <div style="color:#334155; margin:4px 0;">Not: ${v.notlar}</div>
-          <div style="font-size:11px; color:#64748b;">Teklif: ${v.fiyat || 'Yok'} | Tarih: ${v.tarih}</div>
-        </div>
-      `).join('');
+      visitEl.innerHTML = revVisits.map((v) => {
+        const originalIdx = visitsData.indexOf(v);
+        return `
+          <div class="report-item" onclick="showVisitModal(${originalIdx})">
+            <div class="report-header"><span>👤 Danışman: <strong>${v.danisman}</strong> | Müşteri: ${v.musteri}</span><span>${v.durum}</span></div>
+            <div style="color:#334155; margin:4px 0;">Not: ${v.notlar}</div>
+            <div style="font-size:11px; color:#64748b;">Teklif: ${v.fiyat || 'Yok'} | Tarih: ${v.tarih}</div>
+          </div>
+        `;
+      }).join('');
 
-      const resS = await fetch(`${appsScriptUrl}?action=getSales&danisman=MUDUR`);
+      const resS = await fetch(`${appsScriptUrl}?action=getSales`);
       salesData = await resS.json();
-      salesData.reverse();
 
-      // Mert Kitir Satışları ve Toplamı
       const mertSales = salesData.filter(s => s.danisman === 'Mert Kitir');
       const mertTotal = mertSales.reduce((sum, s) => sum + (parseFloat(s.tutar) || 0), 0);
       document.getElementById('mertTotalRev').innerText = formatMoney(mertTotal);
+      let revMert = [...mertSales].reverse();
 
-      mertSalesEl.innerHTML = mertSales.length > 0 ? mertSales.map((s, idx) => {
+      mertSalesEl.innerHTML = revMert.length > 0 ? revMert.map((s) => {
         const globalIdx = salesData.indexOf(s);
         return `
           <div class="report-item" style="border-left: 4px solid #2563eb;" onclick="showSaleModal(${globalIdx})">
             <div class="report-header"><span>🏢 Müşteri: ${s.musteri}</span><span style="color:#16a34a; font-weight:bold;">${formatMoney(s.tutar)}</span></div>
             <div style="font-size:12px; color:#475569;">📦 Ürünler: ${s.ozet}</div>
-            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${s.tarih} (Detay için tıklayın)</div>
+            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${s.tarih}</div>
           </div>
         `;
       }).join('') : '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Mert Kitir için ciro kaydı bulunmuyor.</div>';
 
-      // Volkan Yağmur Satışları ve Toplamı
       const volkanSales = salesData.filter(s => s.danisman === 'Volkan Yağmur');
       const volkanTotal = volkanSales.reduce((sum, s) => sum + (parseFloat(s.tutar) || 0), 0);
       document.getElementById('volkanTotalRev').innerText = formatMoney(volkanTotal);
+      let revVolkan = [...volkanSales].reverse();
 
-      volkanSalesEl.innerHTML = volkanSales.length > 0 ? volkanSales.map((s, idx) => {
+      volkanSalesEl.innerHTML = revVolkan.length > 0 ? revVolkan.map((s) => {
         const globalIdx = salesData.indexOf(s);
         return `
           <div class="report-item" style="border-left: 4px solid #0d9488;" onclick="showSaleModal(${globalIdx})">
             <div class="report-header"><span>🏢 Müşteri: ${s.musteri}</span><span style="color:#16a34a; font-weight:bold;">${formatMoney(s.tutar)}</span></div>
             <div style="font-size:12px; color:#475569;">📦 Ürünler: ${s.ozet}</div>
-            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${s.tarih} (Detay için tıklayın)</div>
+            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${s.tarih}</div>
           </div>
         `;
       }).join('') : '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Volkan Yağmur için ciro kaydı bulunmuyor.</div>';
     }
 
-    // --- MODAL / POP-UP FONKSİYONLARI ---
     function openModal(title, contentHtml) {
       document.getElementById('modalTitle').innerText = title;
       document.getElementById('modalBody').innerHTML = contentHtml;
@@ -650,13 +639,17 @@
         return;
       }
 
-      // Eski kaydı silip yenisini ekleme mantığıyla Sheets'te güncelleme simülasyonu
+      // Eğer isim değiştirildiyse önce eskiyi silelim ki kopya oluşmasın
+      if (oldName !== newName) {
+        await fetch(`${appsScriptUrl}?action=deleteCustomer&name=${encodeURIComponent(oldName)}`);
+      }
+
       const queryParams = new URLSearchParams({
         action: 'addCustomer', name: newName, phone: newPhone, address: newAddress, danisman: currentUser
       }).toString();
 
       try {
-        await fetch(`${appsScriptUrl}?${queryParams}`, { method: 'GET', mode: 'no-cors' });
+        await fetch(`${appsScriptUrl}?${queryParams}`);
         alert('Müşteri bilgileri güncellendi!');
         closeModal();
         setTimeout(loadCustomers, 1000);
@@ -673,7 +666,7 @@
       }).toString();
 
       try {
-        await fetch(`${appsScriptUrl}?${queryParams}`, { method: 'GET', mode: 'no-cors' });
+        await fetch(`${appsScriptUrl}?${queryParams}`);
         alert('Müşteri sistemden silindi.');
         closeModal();
         setTimeout(loadCustomers, 1000);
@@ -698,7 +691,6 @@
       openModal('📋 Resmi Sipariş & Ciro Formu', content);
     }
 
-    // --- SİPARİŞ VE SEPET KONTROLLERİ ---
     function initOrderCatalog() {
       const categories = Object.keys(catalogData);
       if (categories.length === 0) return;
@@ -793,13 +785,12 @@
         ozet: ozet
       }).toString();
 
-      await fetch(`${appsScriptUrl}?${queryParams}`, { method: 'GET', mode: 'no-cors' });
+      await fetch(`${appsScriptUrl}?${queryParams}`);
 
       alert('Sipariş başarıyla onaylandı ve ciro paneline işlendi!');
       cart = []; renderCartTable();
     }
 
-    // Başlangıç yüklemeleri
     changeUser();
     loadData();
   </script>
