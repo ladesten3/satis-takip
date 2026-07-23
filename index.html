@@ -3,149 +3,164 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Saha Satış & Sipariş Sistemi</title>
+  <title>Saha Satış & Sipariş Portalı Pro</title>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
-    body { background-color: #f4f6f8; color: #333; padding: 15px; max-width: 800px; margin: 0 auto; }
+    body { background-color: #f1f5f9; color: #1e293b; padding: 15px; max-width: 900px; margin: 0 auto; }
     
-    .app-header { text-align: center; margin-bottom: 15px; }
-    .app-header h2 { color: #1e293b; font-size: 22px; }
+    .app-header { text-align: center; margin-bottom: 20px; }
+    .app-header h2 { color: #0f172a; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
     /* Navigasyon Sekmeleri */
-    .nav-tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 4px; border-radius: 12px; }
-    .nav-btn { flex: 1; padding: 12px 8px; border: none; background: transparent; font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer; border-radius: 8px; transition: all 0.2s; }
-    .nav-btn.active { background: white; color: #007bff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .nav-tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 5px; border-radius: 12px; }
+    .nav-btn { flex: 1; padding: 12px 8px; border: none; background: transparent; font-size: 14px; font-weight: 700; color: #64748b; cursor: pointer; border-radius: 8px; transition: all 0.2s; }
+    .nav-btn.active { background: white; color: #2563eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Arama ve Kartlar */
-    .search-box { width: 100%; padding: 12px 15px; font-size: 15px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; margin-bottom: 15px; background: white; }
-    .search-box:focus { border-color: #007bff; }
-    
-    .category-card { background: white; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
-    .category-header { width: 100%; padding: 16px; font-size: 16px; font-weight: bold; background: white; border: none; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #007bff; }
-    
-    .subcategory-list { display: none; padding: 10px 15px 15px 15px; background: #f8fafc; border-top: 1px solid #e2e8f0; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
-    .subcategory-list.active { display: grid; }
-    
-    .product-btn { padding: 12px 10px; font-size: 14px; font-weight: 600; background: white; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; color: #334155; text-align: center; }
-    .product-btn:active { background: #007bff; color: white; }
+    /* Kart Yapıları */
+    .card { background: white; padding: 20px; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 20px; }
+    .card-title { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
 
-    .price-display { margin-top: 20px; padding: 20px; background: white; border-radius: 12px; border: 2px solid #007bff; text-align: center; display: none; box-shadow: 0 4px 12px rgba(0,123,255,0.15); }
-    .price-display.active { display: block; }
-    .price-display .prod-title { font-size: 15px; color: #64748b; margin-bottom: 5px; }
-    .price-display .prod-price { font-size: 28px; font-weight: bold; color: #28a745; margin: 10px 0; }
-    .price-display .prod-stock { font-size: 13px; font-weight: bold; display: inline-block; padding: 4px 10px; border-radius: 6px; }
-    .in-stock { background: #e6f4ea; color: #1e7e34; }
-    .out-stock { background: #fce8e6; color: #d93025; }
-
-    /* Form Tasarımları */
-    .form-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 20px; }
+    /* Form Elemanları */
     .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
-    .form-control { width: 100%; padding: 11px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #fff; }
-    .form-control:focus { border-color: #007bff; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-control { width: 100%; padding: 12px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #fff; transition: border 0.2s; }
+    .form-control:focus { border-color: #2563eb; }
     
-    .btn-submit { width: 100%; padding: 14px; background: #007bff; color: white; border: none; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
-    .btn-submit:hover { background: #0056b3; }
+    .btn-main { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+    .btn-main:hover { background: #1d4ed8; }
+    .btn-danger { background: #ef4444; color: white; border: none; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; }
+    .btn-edit { background: #f59e0b; color: white; border: none; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; }
 
-    .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 10px; cursor: pointer; }
-    .checkbox-group input { width: 18px; height: 18px; }
+    /* Müşteri Listesi */
+    .customer-item { padding: 14px; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+    .customer-info strong { display: block; font-size: 15px; color: #0f172a; }
+    .customer-info span { font-size: 13px; color: #64748b; margin-top: 2px; display: block; }
 
-    /* Müşteri Listesi & Sipariş Özet Kartı */
-    .customer-item { padding: 12px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-    .customer-item:last-child { border-bottom: none; }
-    .customer-info strong { display: block; font-size: 15px; color: #1e293b; }
-    .customer-info span { font-size: 13px; color: #64748b; }
+    /* Kategori ve Ürün Listeleme Grid Yapısı */
+    .category-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; }
+    .pill-btn { padding: 8px 16px; border: 1px solid #cbd5e1; background: white; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; color: #475569; }
+    .pill-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
 
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .prod-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+    .prod-card strong { font-size: 14px; color: #1e293b; margin-bottom: 6px; display: block; }
+    .prod-card .price { font-size: 15px; font-weight: 800; color: #16a34a; margin-bottom: 10px; }
+    .prod-card .btn-add { background: #2563eb; color: white; border: none; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
+
+    /* Sipariş Sepet/Kalem Tablosu */
+    .order-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .order-table th { text-align: left; font-size: 12px; color: #64748b; padding: 8px; border-bottom: 1px solid #e2e8f0; }
+    .order-table td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+    .qty-controls { display: flex; align-items: center; gap: 6px; }
+    .btn-qty { width: 26px; height: 26px; border: 1px solid #cbd5e1; background: white; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
+    /* Sipariş Özeti */
     .summary-box { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 16px; margin-top: 15px; }
     .summary-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #475569; }
     .summary-row.total { font-size: 18px; font-weight: bold; color: #0f172a; border-top: 1px solid #cbd5e1; padding-top: 10px; margin-top: 10px; }
 
-    .loading { text-align: center; font-size: 15px; color: #666; margin-top: 30px; }
+    .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 10px; cursor: pointer; }
+    .checkbox-group input { width: 18px; height: 18px; }
+
+    .loading { text-align: center; font-size: 14px; color: #64748b; padding: 20px; }
   </style>
 </head>
 <body>
 
   <div class="app-header">
-    <h2>🎯 Saha Satış & Sipariş Portalı</h2>
+    <h2>🎯 Saha Satış & Sipariş Portalı Pro</h2>
   </div>
 
   <!-- Navigasyon Sekmeleri -->
   <div class="nav-tabs">
     <button class="nav-btn active" onclick="switchTab('catalogTab', this)">📦 Katalog</button>
-    <button class="nav-btn" onclick="switchTab('customerTab', this)">👤 Müşteri Kayıt</button>
+    <button class="nav-btn" onclick="switchTab('customerTab', this)">👤 Müşteri Yönetimi</button>
     <button class="nav-btn" onclick="switchTab('orderTab', this)">📝 Sipariş Oluştur</button>
   </div>
 
   <!-- SEKME 1: KATALOG -->
   <div id="catalogTab" class="tab-content active">
-    <input type="text" id="searchInput" class="search-box" placeholder="Ürün veya kategori ara..." onkeyup="filterProducts()">
-    <div id="catalogContainer">
-      <div class="loading">Katalog yükleniyor...</div>
+    <div class="card">
+      <input type="text" id="searchInput" class="form-control" placeholder="Ürün adı veya kategori ara..." onkeyup="filterCatalog()">
     </div>
-    <div id="priceDisplay" class="price-display"></div>
+    <div id="catalogContainer"><div class="loading">Katalog yükleniyor...</div></div>
   </div>
 
-  <!-- SEKME 2: MÜŞTERİ KAYIT -->
+  <!-- SEKME 2: MÜŞTERİ YÖNETİMİ -->
   <div id="customerTab" class="tab-content">
-    <div class="form-card">
-      <h3 style="margin-bottom: 15px; color: #1e293b;">Yeni Müşteri Ekle</h3>
+    <div class="card">
+      <div class="card-title" id="custFormTitle">Yeni Müşteri Ekle</div>
+      <input type="hidden" id="editCustId" value="">
+      
       <div class="form-group">
-        <label>Firma İsmi *</label>
-        <input type="text" id="custName" class="form-control" placeholder="Örn: ABC İnşaat Ltd. Şti.">
+        <label>Firma / Müşteri Adı *</label>
+        <input type="text" id="custName" class="form-control" placeholder="Örn: Poltek Polyester">
       </div>
       <div class="form-group">
         <label>Telefon Numarası *</label>
-        <input type="tel" id="custPhone" class="form-control" placeholder="Örn: 05xx xxx xx xx">
+        <input type="tel" id="custPhone" class="form-control" placeholder="Örn: 05414241254">
       </div>
       <div class="form-group">
-        <label>Adres *</label>
-        <textarea id="custAddress" class="form-control" rows="3" placeholder="Firma açık adresi..."></textarea>
+        <label>Adres</label>
+        <textarea id="custAddress" class="form-control" rows="2" placeholder="Firma açık adresi..."></textarea>
       </div>
-      <button class="btn-submit" onclick="saveCustomer()">Müşteriyi Kaydet</button>
+      
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-main" id="btnSaveCust" onclick="saveCustomer()">Müşteriyi Kaydet</button>
+        <button class="btn-main" id="btnCancelEdit" style="background:#64748b; display:none;" onclick="resetCustForm()">İptal</button>
+      </div>
     </div>
 
-    <div class="form-card">
-      <h3 style="margin-bottom: 15px; color: #1e293b;">Kayıtlı Müşteriler</h3>
-      <div id="customerList">
-        <div style="font-size: 13px; color: #94a3b8; text-align: center;">Henüz kayıtlı müşteri yok.</div>
-      </div>
+    <div class="card">
+      <div class="card-title">Kayıtlı Müşteriler</div>
+      <div id="customerList"><div class="loading">Müşteriler yükleniyor...</div></div>
     </div>
   </div>
 
   <!-- SEKME 3: SİPARİŞ OLUŞTUR -->
   <div id="orderTab" class="tab-content">
-    <div class="form-card">
-      <h3 style="margin-bottom: 15px; color: #1e293b;">Sipariş Detayları</h3>
-      
+    <div class="card">
+      <div class="card-title">1. Müşteri Seçimi</div>
       <div class="form-group">
-        <label>Müşteri Seçin *</label>
         <select id="orderCustomerSelect" class="form-control">
           <option value="">-- Müşteri Seçin --</option>
         </select>
       </div>
+    </div>
 
-      <div class="form-group">
-        <label>Ürün Adı / Seçimi *</label>
-        <input type="text" id="orderProductName" class="form-control" placeholder="Ürün adını yazın veya katalogdan seçin">
-      </div>
+    <div class="card">
+      <div class="card-title">2. Ürün Ekle (Kategoriden Tüm Ürünler)</div>
+      
+      <!-- Kategori Filtre Butonları -->
+      <div class="category-pills" id="orderCategoryPills"></div>
+      
+      <!-- Seçili Kategorinin Ürünleri -->
+      <div class="product-grid" id="orderProductGrid"></div>
+    </div>
 
-      <div style="display: flex; gap: 10px;">
-        <div class="form-group" style="flex: 1;">
-          <label>Aded *</label>
-          <input type="number" id="orderQty" class="form-control" value="1" min="1" oninput="calculateOrder()">
-        </div>
-        <div class="form-group" style="flex: 1;">
-          <label>Birim Fiyat (TL) *</label>
-          <input type="number" id="orderUnitPrice" class="form-control" placeholder="0.00" step="0.01" oninput="calculateOrder()">
-        </div>
-      </div>
+    <div class="card">
+      <div class="card-title">3. Seçilen Sipariş Kalemleri</div>
+      
+      <table class="order-table">
+        <thead>
+          <tr>
+            <th>Ürün</th>
+            <th style="width: 90px;">Adet</th>
+            <th>Fiyat</th>
+            <th style="width: 30px;"></th>
+          </tr>
+        </thead>
+        <tbody id="cartItemsContainer">
+          <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Henüz ürün eklenmedi.</td></tr>
+        </tbody>
+      </table>
 
-      <div class="form-group">
+      <div class="form-group" style="margin-top: 15px;">
         <label class="checkbox-group">
-          <input type="checkbox" id="orderKdvCheck" onchange="calculateOrder()" checked>
+          <input type="checkbox" id="orderKdvCheck" onchange="renderCartSummary()" checked>
           <span>%20 KDV Uygulansın</span>
         </label>
       </div>
@@ -166,7 +181,7 @@
         </div>
       </div>
 
-      <button class="btn-submit" style="margin-top: 15px; background: #16a34a;" onclick="shareOrder()">Siparişi Kopyala / Paylaş</button>
+      <button class="btn-main" style="margin-top: 15px; background: #16a34a;" onclick="shareOrder()">Siparişi Tamamla & Kopyala</button>
     </div>
   </div>
 
@@ -176,17 +191,22 @@
 
     let catalogData = {};
     let customers = JSON.parse(localStorage.getItem('saved_customers') || '[]');
+    let cart = []; // { name, price, qty }
+    let selectedOrderCategory = '';
 
-    // Sekme Değiştirme
     function switchTab(tabId, btn) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       btn.classList.add('active');
-      if(tabId === 'orderTab') renderCustomerSelect();
+      
+      if(tabId === 'orderTab') {
+        renderCustomerSelect();
+        initOrderCatalog();
+      }
     }
 
-    // Google Sheets Kataloğu
+    // Google Sheets Verilerini Yükle
     async function loadData() {
       try {
         const response = await fetch(jsonUrl);
@@ -202,7 +222,7 @@
           if (c && c[0] && c[1]) {
             const name = c[0].v ? c[0].v.toString().trim() : '';
             const category = c[1].v ? c[1].v.toString().trim().toUpperCase() : 'GENEL';
-            const price = c[2] ? c[2].v : '0';
+            const price = c[2] ? parseFloat(c[2].v) || 0 : 0;
             const stock = c[3] ? parseInt(c[3].v) : 0;
 
             if (!catalogData[category]) catalogData[category] = [];
@@ -212,7 +232,7 @@
 
         renderCatalog(catalogData);
       } catch (error) {
-        document.getElementById("catalogContainer").innerHTML = "<div class='loading'>Veriler yüklenemedi. İnternet bağlantısını kontrol edin.</div>";
+        document.getElementById("catalogContainer").innerHTML = "<div class='loading'>Katalog yüklenemedi.</div>";
       }
     }
 
@@ -220,65 +240,32 @@
       const container = document.getElementById("catalogContainer");
       container.innerHTML = "";
 
-      if (Object.keys(data).length === 0) {
-        container.innerHTML = "<div class='loading'>Ürün bulunamadı.</div>";
-        return;
-      }
-
       Object.keys(data).forEach(cat => {
         const card = document.createElement("div");
-        card.className = "category-card";
-
-        const header = document.createElement("button");
-        header.className = "category-header";
-        header.innerHTML = `<span>📁 ${cat}</span> <span>▼</span>`;
-
-        const subList = document.createElement("div");
-        subList.className = "subcategory-list";
-
-        header.onclick = () => {
-          document.querySelectorAll(".subcategory-list").forEach(el => {
-            if (el !== subList) el.classList.remove("active");
-          });
-          subList.classList.toggle("active");
-        };
+        card.className = "card";
+        card.innerHTML = `<div class="card-title" style="color:#2563eb;">📁 ${cat}</div>`;
+        
+        const grid = document.createElement("div");
+        grid.className = "product-grid";
 
         data[cat].forEach(prod => {
-          const btn = document.createElement("button");
-          btn.className = "product-btn";
-          btn.innerText = prod.name;
-          btn.onclick = () => {
-            showPrice(cat, prod);
-            // Sipariş sekmesine otomatik bilgi taşı
-            document.getElementById('orderProductName').value = prod.name;
-            document.getElementById('orderUnitPrice').value = prod.price;
-            calculateOrder();
-          };
-          subList.appendChild(btn);
+          grid.innerHTML += `
+            <div class="prod-card">
+              <strong>${prod.name}</strong>
+              <div class="price">${prod.price.toFixed(2)} TL</div>
+              <span style="font-size:11px; color:${prod.stock > 0 ? '#16a34a' : '#ef4444'}; font-weight:bold;">
+                ${prod.stock > 0 ? 'Stok: ' + prod.stock : 'Stok Tükendi'}
+              </span>
+            </div>
+          `;
         });
 
-        card.appendChild(header);
-        card.appendChild(subList);
+        card.appendChild(grid);
         container.appendChild(card);
       });
     }
 
-    function showPrice(category, prod) {
-      const display = document.getElementById("priceDisplay");
-      const isStock = prod.stock > 0;
-
-      display.innerHTML = `
-        <div class="prod-title">${category} > <strong>${prod.name}</strong></div>
-        <div class="prod-price">${prod.price} TL</div>
-        <span class="prod-stock ${isStock ? 'in-stock' : 'out-stock'}">
-          ${isStock ? 'Stokta Var (' + prod.stock + ' adet)' : 'Stok Tükendi'}
-        </span>
-      `;
-      display.classList.add("active");
-      display.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function filterProducts() {
+    function filterCatalog() {
       const query = document.getElementById("searchInput").value.toLowerCase();
       if (!query) { renderCatalog(catalogData); return; }
 
@@ -291,42 +278,86 @@
       });
 
       renderCatalog(filtered);
-      document.querySelectorAll(".subcategory-list").forEach(el => el.classList.add("active"));
     }
 
-    // Müşteri İşlemleri
+    // --- MÜŞTERİ YÖNETİMİ (KAYIT, GÜNCELLEME, SİLME) ---
     function saveCustomer() {
       const name = document.getElementById('custName').value.trim();
       const phone = document.getElementById('custPhone').value.trim();
       const address = document.getElementById('custAddress').value.trim();
+      const editId = document.getElementById('editCustId').value;
 
-      if(!name || !phone) {
-        alert('Lütfen Firma İsmi ve Telefon alanlarını doldurun.');
+      if (!name || !phone) {
+        alert('Lütfen Firma Adı ve Telefon alanlarını doldurun.');
         return;
       }
 
-      customers.push({ id: Date.now(), name, phone, address });
-      localStorage.setItem('saved_customers', JSON.stringify(customers));
+      if (editId) {
+        // Güncelleme Modu
+        const index = customers.findIndex(c => c.id == editId);
+        if (index !== -1) {
+          customers[index] = { id: Number(editId), name, phone, address };
+          alert('Müşteri bilgileri güncellendi.');
+        }
+      } else {
+        // Yeni Ekleme Modu
+        customers.push({ id: Date.now(), name, phone, address });
+        alert('Müşteri başarıyla kaydedildi.');
+      }
 
+      localStorage.setItem('saved_customers', JSON.stringify(customers));
+      resetCustForm();
+      renderCustomerList();
+    }
+
+    function editCustomer(id) {
+      const cust = customers.find(c => c.id == id);
+      if (!cust) return;
+
+      document.getElementById('editCustId').value = cust.id;
+      document.getElementById('custName').value = cust.name;
+      document.getElementById('custPhone').value = cust.phone;
+      document.getElementById('custAddress').value = cust.address || '';
+
+      document.getElementById('custFormTitle').innerText = 'Müşteri Bilgilerini Güncelle';
+      document.getElementById('btnSaveCust').innerText = 'Değişiklikleri Kaydet';
+      document.getElementById('btnCancelEdit').style.display = 'block';
+    }
+
+    function deleteCustomer(id) {
+      if (confirm('Bu müşteriyi silmek istediğinizden emin misiniz?')) {
+        customers = customers.filter(c => c.id != id);
+        localStorage.setItem('saved_customers', JSON.stringify(customers));
+        renderCustomerList();
+      }
+    }
+
+    function resetCustForm() {
+      document.getElementById('editCustId').value = '';
       document.getElementById('custName').value = '';
       document.getElementById('custPhone').value = '';
       document.getElementById('custAddress').value = '';
 
-      renderCustomerList();
-      alert('Müşteri başarıyla kaydedildi!');
+      document.getElementById('custFormTitle').innerText = 'Yeni Müşteri Ekle';
+      document.getElementById('btnSaveCust').innerText = 'Müşteriyi Kaydet';
+      document.getElementById('btnCancelEdit').style.display = 'none';
     }
 
     function renderCustomerList() {
       const listEl = document.getElementById('customerList');
-      if(customers.length === 0) {
-        listEl.innerHTML = '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Henüz kayıtlı müşteri yok.</div>';
+      if (customers.length === 0) {
+        listEl.innerHTML = '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Henüz kayıtlı müşteri bulunmuyor.</div>';
         return;
       }
       listEl.innerHTML = customers.map(c => `
         <div class="customer-item">
           <div class="customer-info">
             <strong>${c.name}</strong>
-            <span>📞 ${c.phone} | 📍 ${c.address}</span>
+            <span>📞 ${c.phone} ${c.address ? '| 📍 ' + c.address : ''}</span>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn-edit" onclick="editCustomer(${c.id})">✏️ Düzenle</button>
+            <button class="btn-danger" onclick="deleteCustomer(${c.id})">🗑️ Sil</button>
           </div>
         </div>
       `).join('');
@@ -335,16 +366,97 @@
     function renderCustomerSelect() {
       const selectEl = document.getElementById('orderCustomerSelect');
       selectEl.innerHTML = '<option value="">-- Müşteri Seçin --</option>' + 
-        customers.map(c => `<option value="${c.name}">${c.name} (${c.phone})</option>`).join('');
+        customers.map(c => `<option value="${c.name} (${c.phone})">${c.name} (${c.phone})</option>`).join('');
     }
 
-    // Sipariş Hesaplama
-    function calculateOrder() {
-      const qty = parseFloat(document.getElementById('orderQty').value) || 0;
-      const unitPrice = parseFloat(document.getElementById('orderUnitPrice').value) || 0;
-      const kdvCheck = document.getElementById('orderKdvCheck').checked;
+    // --- SİPARİŞ KATEGORİDEN ÇOKLU ÜRÜN SEÇİMİ VE SEPET ---
+    function initOrderCatalog() {
+      const pillsContainer = document.getElementById('orderCategoryPills');
+      const categories = Object.keys(catalogData);
 
-      const subtotal = qty * unitPrice;
+      if (categories.length === 0) return;
+
+      pillsContainer.innerHTML = categories.map((cat, idx) => `
+        <button class="pill-btn ${idx === 0 ? 'active' : ''}" onclick="selectOrderCategory('${cat}', this)">${cat}</button>
+      `).join('');
+
+      selectOrderCategory(categories[0]);
+    }
+
+    function selectOrderCategory(category, btnEl) {
+      selectedOrderCategory = category;
+      if(btnEl) {
+        document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+      }
+
+      const grid = document.getElementById('orderProductGrid');
+      grid.innerHTML = (catalogData[category] || []).map(p => `
+        <div class="prod-card">
+          <strong>${p.name}</strong>
+          <div class="price">${p.price.toFixed(2)} TL</div>
+          <button class="btn-add" onclick="addToCart('${p.name}', ${p.price})">➕ Sepete Ekle</button>
+        </div>
+      `).join('');
+    }
+
+    function addToCart(name, price) {
+      const existing = cart.find(i => i.name === name);
+      if (existing) {
+        existing.qty++;
+      } else {
+        cart.push({ name, price, qty: 1 });
+      }
+      renderCartTable();
+    }
+
+    function updateCartQty(name, delta) {
+      const item = cart.find(i => i.name === name);
+      if (item) {
+        item.qty += delta;
+        if (item.qty <= 0) {
+          cart = cart.filter(i => i.name !== name);
+        }
+      }
+      renderCartTable();
+    }
+
+    function removeFromCart(name) {
+      cart = cart.filter(i => i.name !== name);
+      renderCartTable();
+    }
+
+    function renderCartTable() {
+      const tbody = document.getElementById('cartItemsContainer');
+      if (cart.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Henüz ürün eklenmedi.</td></tr>';
+        renderCartSummary();
+        return;
+      }
+
+      tbody.innerHTML = cart.map(item => `
+        <tr>
+          <td><strong>${item.name}</strong></td>
+          <td>
+            <div class="qty-controls">
+              <button class="btn-qty" onclick="updateCartQty('${item.name}', -1)">-</button>
+              <span>${item.qty}</span>
+              <button class="btn-qty" onclick="updateCartQty('${item.name}', 1)">+</button>
+            </div>
+          </td>
+          <td>${(item.price * item.qty).toFixed(2)} TL</td>
+          <td>
+            <button style="border:none; background:none; cursor:pointer;" onclick="removeFromCart('${item.name}')">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+
+      renderCartSummary();
+    }
+
+    function renderCartSummary() {
+      let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      const kdvCheck = document.getElementById('orderKdvCheck').checked;
       const kdv = kdvCheck ? subtotal * 0.20 : 0;
       const total = subtotal + kdv;
 
@@ -354,16 +466,28 @@
     }
 
     function shareOrder() {
-      const cust = document.getElementById('orderCustomerSelect').value || 'Belirtilmedi';
-      const prod = document.getElementById('orderProductName').value || 'Ürün Belirtilmedi';
-      const qty = document.getElementById('orderQty').value;
-      const unitPrice = document.getElementById('orderUnitPrice').value;
+      const cust = document.getElementById('orderCustomerSelect').value;
+      if (!cust) {
+        alert('Lütfen bir müşteri seçin.');
+        return;
+      }
+      if (cart.length === 0) {
+        alert('Lütfen en az 1 ürün ekleyin.');
+        return;
+      }
+
+      let itemsText = cart.map((item, idx) => 
+        `${idx + 1}. ${item.name} x ${item.qty} Adet = ${(item.price * item.qty).toFixed(2)} TL`
+      ).join('\n');
+
+      const subtotal = document.getElementById('sumSubtotal').innerText;
+      const kdv = document.getElementById('sumKdv').innerText;
       const total = document.getElementById('sumTotal').innerText;
 
-      const text = `📋 SİPARİŞ ÖZETİ\n\n👤 Müşteri: ${cust}\n📦 Ürün: ${prod}\n🔢 Adet: ${qty}\n💰 Birim Fiyat: ${unitPrice} TL\n💵 Genel Toplam (KDV Dahil): ${total}`;
+      const text = `📋 SİPARİŞ ÖZETİ\n\n👤 Müşteri: ${cust}\n\n📦 ÜRÜNLER:\n${itemsText}\n\n💵 Ara Toplam: ${subtotal}\n🧾 KDV (%20): ${kdv}\n🎯 GENEL TOPLAM: ${total}`;
 
       navigator.clipboard.writeText(text);
-      alert('Sipariş özeti panoya kopyalandı! WhatsApp veya SMS ile paylaşabilirsiniz:\n\n' + text);
+      alert('Sipariş özeti başarıyla kopyalandı! WhatsApp veya Mail ile paylaşabilirsiniz:\n\n' + text);
     }
 
     loadData();
