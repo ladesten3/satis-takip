@@ -41,7 +41,7 @@
     .report-item { padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; background: #f8fafc; font-size: 13px; }
     .report-header { display: flex; justify-content: space-between; margin-bottom: 6px; font-weight: bold; color: #0f172a; }
 
-    /* Kategori ve Ürün Listeleme Grid Yapısı */
+    /* Kategori ve Ürün Grid */
     .category-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; }
     .pill-btn { padding: 8px 16px; border: 1px solid #cbd5e1; background: white; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; color: #475569; }
     .pill-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
@@ -50,6 +50,10 @@
     .prod-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; text-align: center; }
     .prod-card .price { font-size: 14px; font-weight: 800; color: #16a34a; margin: 6px 0; }
     
+    /* Sipariş Adet Düzenleme Butonları */
+    .qty-btn { width: 28px; height: 28px; border: 1px solid #cbd5e1; background: #f1f5f9; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    .qty-btn:active { background: #e2e8f0; }
+
     .order-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     .order-table th { text-align: left; font-size: 12px; color: #64748b; padding: 6px; border-bottom: 1px solid #e2e8f0; }
     .order-table td { padding: 8px 6px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
@@ -86,7 +90,7 @@
     <button class="nav-btn" id="mudurTabBtn" onclick="switchTab('mudurTab', this)" style="display:none; background:#fef3c7; color:#b45309;">📊 Müdür Raporu</button>
   </div>
 
-  <!-- SEKME 1: ZİYARET & GÖRÜŞME RAPORU EKLE -->
+  <!-- SEKME 1: ZİYARET RAPORU -->
   <div id="visitTab" class="tab-content active">
     <div class="card">
       <div class="card-title">Müşteri Ziyaret & Görüşme Notu Gir</div>
@@ -114,7 +118,7 @@
 
       <div class="form-group">
         <label>Görüşme Detayları & Müşteri Geri Dönüşü *</label>
-        <textarea id="visitNotes" class="form-control" rows="3" placeholder="Müşteri ne söyledi? Hangi ürünler konuşuldu? Neden olumlu/olumsuz geçti?"></textarea>
+        <textarea id="visitNotes" class="form-control" rows="3" placeholder="Görüşme detayları..."></textarea>
       </div>
 
       <button class="btn-main" id="btnSaveVisit" onclick="saveVisitReport()">Ziyaret Raporunu Kaydet</button>
@@ -146,7 +150,7 @@
     </div>
 
     <div class="card">
-      <div class="card-title">Kayıtlı Müşteri Listesi</div>
+      <div class="card-title" id="customerListTitle">Kayıtlı Müşteri Listesi</div>
       <div id="customerList"><div class="loading">Yükleniyor...</div></div>
     </div>
   </div>
@@ -170,7 +174,7 @@
         <thead>
           <tr>
             <th>Ürün</th>
-            <th style="width: 80px; text-align: center;">Adet</th>
+            <th style="width: 110px; text-align: center;">Adet</th>
             <th style="text-align: right;">Fiyat</th>
             <th style="width: 30px;"></th>
           </tr>
@@ -196,7 +200,7 @@
     <div id="catalogContainer"><div class="loading">Katalog yükleniyor...</div></div>
   </div>
 
-  <!-- SEKME 5: MÜDÜR ÖZEL RAPOR PANELİ -->
+  <!-- SEKME 5: MÜDÜR PANELİ -->
   <div id="mudurTab" class="tab-content">
     <div class="card" style="border: 2px solid #f59e0b; background: #fffbeb;">
       <div class="card-title" style="color: #b45309;">👑 Yönetici Özeti (Gökmen Yorulmaz)</div>
@@ -305,14 +309,29 @@
 
     function renderCustomerList() {
       const listEl = document.getElementById('customerList');
+      const titleEl = document.getElementById('customerListTitle');
+      
+      if (currentUser === 'MUDUR') {
+        titleEl.innerText = "🌐 Tüm Müşteri Listesi (Yönetici Görünümü)";
+      } else {
+        titleEl.innerText = `👤 ${currentUser} - Özel Müşteri Listesi`;
+      }
+
       if (!customers || customers.length === 0) {
-        listEl.innerHTML = '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Müşteri bulunamadı.</div>';
+        listEl.innerHTML = '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Kayıtlı müşteri bulunamadı.</div>';
         return;
       }
+
       listEl.innerHTML = customers.map(c => `
         <div class="report-item">
-          <div class="report-header"><span>${c.name}</span><span style="color:#64748b;">${c.phone}</span></div>
-          <div style="color:#64748b; font-size:12px;">📍 ${c.address || 'Adres Girilmedi'} | 👤 Kaydeden: ${c.danisman || 'Genel'}</div>
+          <div class="report-header">
+            <span>🏢 ${c.name}</span>
+            <span style="color:#2563eb; font-weight:bold;">📞 ${c.phone}</span>
+          </div>
+          <div style="color:#64748b; font-size:12px; margin-top:4px;">📍 Adres: ${c.address || 'Adres Girilmedi'}</div>
+          <div style="font-size:11px; color:#059669; font-weight:bold; margin-top:6px; background:#ecfdf5; padding:4px 8px; border-radius:4px; display:inline-block;">
+            👤 Danışman: ${c.danisman || 'Genel'}
+          </div>
         </div>
       `).join('');
     }
@@ -332,29 +351,23 @@
       const btn = document.getElementById('btnSaveCust');
       btn.disabled = true; btn.innerText = 'Kaydediliyor...';
 
-      const payload = {
+      const queryParams = new URLSearchParams({
         action: 'addCustomer',
         name: name,
         phone: phone,
         address: address,
         danisman: currentUser
-      };
+      }).toString();
 
       try {
-        await fetch(appsScriptUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify(payload)
-        });
-        
-        alert('Müşteri kaydı gönderildi!');
+        await fetch(`${appsScriptUrl}?${queryParams}`, { method: 'GET', mode: 'no-cors' });
+        alert('Müşteri başarıyla eklendi!');
         document.getElementById('custName').value = '';
         document.getElementById('custPhone').value = '';
         document.getElementById('custAddress').value = '';
-        setTimeout(loadCustomers, 1500);
+        setTimeout(loadCustomers, 1200);
       } catch (err) {
-        alert('Hata oluştu: ' + err);
+        alert('Ekleme sırasında hata: ' + err);
       } finally {
         btn.disabled = false; btn.innerText = 'Müşteriyi Veritabanına Ekle';
       }
@@ -371,26 +384,21 @@
       const btn = document.getElementById('btnSaveVisit');
       btn.disabled = true; btn.innerText = 'Kaydediliyor...';
 
-      const payload = {
+      const queryParams = new URLSearchParams({
         action: 'addVisit',
         danisman: currentUser,
         musteri: musteri,
         durum: durum,
         fiyat: fiyat,
         notlar: notlar
-      };
+      }).toString();
 
       try {
-        await fetch(appsScriptUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify(payload)
-        });
+        await fetch(`${appsScriptUrl}?${queryParams}`, { method: 'GET', mode: 'no-cors' });
         alert('Ziyaret raporu kaydedildi!');
         document.getElementById('visitPrice').value = '';
         document.getElementById('visitNotes').value = '';
-        setTimeout(loadVisits, 1500);
+        setTimeout(loadVisits, 1200);
       } catch (err) {
         alert('Kayıt hatası: ' + err);
       } finally {
@@ -443,7 +451,7 @@
       `).join('');
     }
 
-    // --- SİPARİŞ MANTIĞI ---
+    // --- SİPARİŞ KONTROLLERİ ---
     function initOrderCatalog() {
       const categories = Object.keys(catalogData);
       if (categories.length === 0) return;
@@ -470,17 +478,34 @@
       renderCartTable();
     }
 
+    function changeQty(name, delta) {
+      const item = cart.find(i => i.name === name);
+      if (item) {
+        item.qty += delta;
+        if (item.qty <= 0) {
+          cart = cart.filter(i => i.name !== name);
+        }
+      }
+      renderCartTable();
+    }
+
     function renderCartTable() {
       const tbody = document.getElementById('cartItemsContainer');
       if(cart.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Ürün eklenmedi.</td></tr>'; return; }
+      
       tbody.innerHTML = cart.map(item => `
         <tr>
           <td><strong>${item.name}</strong></td>
-          <td style="text-align:center;">${item.qty}</td>
+          <td style="text-align:center;">
+            <button class="qty-btn" onclick="changeQty('${item.name}', -1)">-</button>
+            <span style="margin: 0 6px; font-weight:bold;">${item.qty}</span>
+            <button class="qty-btn" onclick="changeQty('${item.name}', 1)">+</button>
+          </td>
           <td style="text-align:right;">${formatMoney(item.price * item.qty)}</td>
           <td><button style="border:none; background:none; cursor:pointer;" onclick="removeFromCart('${item.name}')">🗑️</button></td>
         </tr>
       `).join('');
+
       let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0);
       document.getElementById('sumSubtotal').innerText = formatMoney(sub);
       document.getElementById('sumKdv').innerText = formatMoney(sub * 0.20);
@@ -496,20 +521,15 @@
       const sub = cart.reduce((s, i) => s + (i.price * i.qty), 0) * 1.20;
       const ozet = cart.map(i => `${i.name} (${i.qty} Adet)`).join(', ');
 
-      const payload = {
+      const queryParams = new URLSearchParams({
         action: 'addSale',
         danisman: currentUser,
         musteri: cust,
         tutar: sub,
         ozet: ozet
-      };
+      }).toString();
 
-      await fetch(appsScriptUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-      });
+      await fetch(`${appsScriptUrl}?${queryParams}`, { method: 'GET', mode: 'no-cors' });
 
       alert('Sipariş onaylandı ve ciro paneline işlendi!');
       cart = []; renderCartTable();
