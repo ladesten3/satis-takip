@@ -3,14 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Saha Satış Kataloğu</title>
+  <title>Saha Satış & Sipariş Sistemi</title>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
-    body { background-color: #f4f6f8; color: #333; padding: 15px; }
-    .header { text-align: center; margin-bottom: 20px; }
-    .header h2 { color: #1e293b; font-size: 20px; }
+    body { background-color: #f4f6f8; color: #333; padding: 15px; max-width: 800px; margin: 0 auto; }
     
-    .search-box { width: 100%; padding: 12px 15px; font-size: 16px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; margin-bottom: 15px; background: white; }
+    .app-header { text-align: center; margin-bottom: 15px; }
+    .app-header h2 { color: #1e293b; font-size: 22px; }
+
+    /* Navigasyon Sekmeleri */
+    .nav-tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 4px; border-radius: 12px; }
+    .nav-btn { flex: 1; padding: 12px 8px; border: none; background: transparent; font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer; border-radius: 8px; transition: all 0.2s; }
+    .nav-btn.active { background: white; color: #007bff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Arama ve Kartlar */
+    .search-box { width: 100%; padding: 12px 15px; font-size: 15px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; margin-bottom: 15px; background: white; }
     .search-box:focus { border-color: #007bff; }
     
     .category-card { background: white; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
@@ -19,8 +29,8 @@
     .subcategory-list { display: none; padding: 10px 15px 15px 15px; background: #f8fafc; border-top: 1px solid #e2e8f0; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
     .subcategory-list.active { display: grid; }
     
-    .product-btn { padding: 12px 10px; font-size: 14px; font-weight: 600; background: white; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; color: #334155; text-align: center; transition: all 0.2s; }
-    .product-btn:active { background: #007bff; color: white; border-color: #007bff; }
+    .product-btn { padding: 12px 10px; font-size: 14px; font-weight: 600; background: white; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; color: #334155; text-align: center; }
+    .product-btn:active { background: #007bff; color: white; }
 
     .price-display { margin-top: 20px; padding: 20px; background: white; border-radius: 12px; border: 2px solid #007bff; text-align: center; display: none; box-shadow: 0 4px 12px rgba(0,123,255,0.15); }
     .price-display.active { display: block; }
@@ -30,29 +40,153 @@
     .in-stock { background: #e6f4ea; color: #1e7e34; }
     .out-stock { background: #fce8e6; color: #d93025; }
 
-    .loading { text-align: center; font-size: 16px; color: #666; margin-top: 30px; }
+    /* Form Tasarımları */
+    .form-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 20px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+    .form-control { width: 100%; padding: 11px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #fff; }
+    .form-control:focus { border-color: #007bff; }
+    
+    .btn-submit { width: 100%; padding: 14px; background: #007bff; color: white; border: none; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+    .btn-submit:hover { background: #0056b3; }
+
+    .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 10px; cursor: pointer; }
+    .checkbox-group input { width: 18px; height: 18px; }
+
+    /* Müşteri Listesi & Sipariş Özet Kartı */
+    .customer-item { padding: 12px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+    .customer-item:last-child { border-bottom: none; }
+    .customer-info strong { display: block; font-size: 15px; color: #1e293b; }
+    .customer-info span { font-size: 13px; color: #64748b; }
+
+    .summary-box { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 16px; margin-top: 15px; }
+    .summary-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; color: #475569; }
+    .summary-row.total { font-size: 18px; font-weight: bold; color: #0f172a; border-top: 1px solid #cbd5e1; padding-top: 10px; margin-top: 10px; }
+
+    .loading { text-align: center; font-size: 15px; color: #666; margin-top: 30px; }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <h2>🎯 Ürün & Fiyat Kataloğu</h2>
+  <div class="app-header">
+    <h2>🎯 Saha Satış & Sipariş Portalı</h2>
   </div>
 
-  <input type="text" id="searchInput" class="search-box" placeholder="Ürün veya kategori ara..." onkeyup="filterProducts()">
-
-  <div id="catalogContainer">
-    <div class="loading">Katalog yükleniyor...</div>
+  <!-- Navigasyon Sekmeleri -->
+  <div class="nav-tabs">
+    <button class="nav-btn active" onclick="switchTab('catalogTab', this)">📦 Katalog</button>
+    <button class="nav-btn" onclick="switchTab('customerTab', this)">👤 Müşteri Kayıt</button>
+    <button class="nav-btn" onclick="switchTab('orderTab', this)">📝 Sipariş Oluştur</button>
   </div>
 
-  <div id="priceDisplay" class="price-display"></div>
+  <!-- SEKME 1: KATALOG -->
+  <div id="catalogTab" class="tab-content active">
+    <input type="text" id="searchInput" class="search-box" placeholder="Ürün veya kategori ara..." onkeyup="filterProducts()">
+    <div id="catalogContainer">
+      <div class="loading">Katalog yükleniyor...</div>
+    </div>
+    <div id="priceDisplay" class="price-display"></div>
+  </div>
+
+  <!-- SEKME 2: MÜŞTERİ KAYIT -->
+  <div id="customerTab" class="tab-content">
+    <div class="form-card">
+      <h3 style="margin-bottom: 15px; color: #1e293b;">Yeni Müşteri Ekle</h3>
+      <div class="form-group">
+        <label>Firma İsmi *</label>
+        <input type="text" id="custName" class="form-control" placeholder="Örn: ABC İnşaat Ltd. Şti.">
+      </div>
+      <div class="form-group">
+        <label>Telefon Numarası *</label>
+        <input type="tel" id="custPhone" class="form-control" placeholder="Örn: 05xx xxx xx xx">
+      </div>
+      <div class="form-group">
+        <label>Adres *</label>
+        <textarea id="custAddress" class="form-control" rows="3" placeholder="Firma açık adresi..."></textarea>
+      </div>
+      <button class="btn-submit" onclick="saveCustomer()">Müşteriyi Kaydet</button>
+    </div>
+
+    <div class="form-card">
+      <h3 style="margin-bottom: 15px; color: #1e293b;">Kayıtlı Müşteriler</h3>
+      <div id="customerList">
+        <div style="font-size: 13px; color: #94a3b8; text-align: center;">Henüz kayıtlı müşteri yok.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEKME 3: SİPARİŞ OLUŞTUR -->
+  <div id="orderTab" class="tab-content">
+    <div class="form-card">
+      <h3 style="margin-bottom: 15px; color: #1e293b;">Sipariş Detayları</h3>
+      
+      <div class="form-group">
+        <label>Müşteri Seçin *</label>
+        <select id="orderCustomerSelect" class="form-control">
+          <option value="">-- Müşteri Seçin --</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Ürün Adı / Seçimi *</label>
+        <input type="text" id="orderProductName" class="form-control" placeholder="Ürün adını yazın veya katalogdan seçin">
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <div class="form-group" style="flex: 1;">
+          <label>Aded *</label>
+          <input type="number" id="orderQty" class="form-control" value="1" min="1" oninput="calculateOrder()">
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label>Birim Fiyat (TL) *</label>
+          <input type="number" id="orderUnitPrice" class="form-control" placeholder="0.00" step="0.01" oninput="calculateOrder()">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-group">
+          <input type="checkbox" id="orderKdvCheck" onchange="calculateOrder()" checked>
+          <span>%20 KDV Uygulansın</span>
+        </label>
+      </div>
+
+      <!-- Hesaplama Özeti -->
+      <div class="summary-box">
+        <div class="summary-row">
+          <span>Ara Toplam:</span>
+          <span id="sumSubtotal">0.00 TL</span>
+        </div>
+        <div class="summary-row">
+          <span>KDV Tutarı (%20):</span>
+          <span id="sumKdv">0.00 TL</span>
+        </div>
+        <div class="summary-row total">
+          <span>Genel Toplam:</span>
+          <span id="sumTotal">0.00 TL</span>
+        </div>
+      </div>
+
+      <button class="btn-submit" style="margin-top: 15px; background: #16a34a;" onclick="shareOrder()">Siparişi Kopyala / Paylaş</button>
+    </div>
+  </div>
 
   <script>
     const sheetId = '1_5EKMvh2NNaNfa32OYWQJ75OJ9SYudUbViq4jiNj7jM';
     const jsonUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
     let catalogData = {};
+    let customers = JSON.parse(localStorage.getItem('saved_customers') || '[]');
 
+    // Sekme Değiştirme
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+      if(tabId === 'orderTab') renderCustomerSelect();
+    }
+
+    // Google Sheets Kataloğu
     async function loadData() {
       try {
         const response = await fetch(jsonUrl);
@@ -66,22 +200,19 @@
         rows.forEach(row => {
           const c = row.c;
           if (c && c[0] && c[1]) {
-            // A sütunu = Ürün Adı, B sütunu = Kategori
             const name = c[0].v ? c[0].v.toString().trim() : '';
             const category = c[1].v ? c[1].v.toString().trim().toUpperCase() : 'GENEL';
             const price = c[2] ? c[2].v : '0';
             const stock = c[3] ? parseInt(c[3].v) : 0;
 
-            if (!catalogData[category]) {
-              catalogData[category] = [];
-            }
+            if (!catalogData[category]) catalogData[category] = [];
             catalogData[category].push({ name, price, stock });
           }
         });
 
         renderCatalog(catalogData);
       } catch (error) {
-        document.getElementById("catalogContainer").innerHTML = "<div class='loading'>Veriler yüklenemedi. Lütfen internet bağlantınızı kontrol edin.</div>";
+        document.getElementById("catalogContainer").innerHTML = "<div class='loading'>Veriler yüklenemedi. İnternet bağlantısını kontrol edin.</div>";
       }
     }
 
@@ -116,7 +247,13 @@
           const btn = document.createElement("button");
           btn.className = "product-btn";
           btn.innerText = prod.name;
-          btn.onclick = () => showPrice(cat, prod);
+          btn.onclick = () => {
+            showPrice(cat, prod);
+            // Sipariş sekmesine otomatik bilgi taşı
+            document.getElementById('orderProductName').value = prod.name;
+            document.getElementById('orderUnitPrice').value = prod.price;
+            calculateOrder();
+          };
           subList.appendChild(btn);
         });
 
@@ -143,26 +280,94 @@
 
     function filterProducts() {
       const query = document.getElementById("searchInput").value.toLowerCase();
-      if (!query) {
-        renderCatalog(catalogData);
-        return;
-      }
+      if (!query) { renderCatalog(catalogData); return; }
 
       const filtered = {};
       Object.keys(catalogData).forEach(cat => {
         const matchingProds = catalogData[cat].filter(p => 
           p.name.toLowerCase().includes(query) || cat.toLowerCase().includes(query)
         );
-        if (matchingProds.length > 0) {
-          filtered[cat] = matchingProds;
-        }
+        if (matchingProds.length > 0) filtered[cat] = matchingProds;
       });
 
       renderCatalog(filtered);
       document.querySelectorAll(".subcategory-list").forEach(el => el.classList.add("active"));
     }
 
+    // Müşteri İşlemleri
+    function saveCustomer() {
+      const name = document.getElementById('custName').value.trim();
+      const phone = document.getElementById('custPhone').value.trim();
+      const address = document.getElementById('custAddress').value.trim();
+
+      if(!name || !phone) {
+        alert('Lütfen Firma İsmi ve Telefon alanlarını doldurun.');
+        return;
+      }
+
+      customers.push({ id: Date.now(), name, phone, address });
+      localStorage.setItem('saved_customers', JSON.stringify(customers));
+
+      document.getElementById('custName').value = '';
+      document.getElementById('custPhone').value = '';
+      document.getElementById('custAddress').value = '';
+
+      renderCustomerList();
+      alert('Müşteri başarıyla kaydedildi!');
+    }
+
+    function renderCustomerList() {
+      const listEl = document.getElementById('customerList');
+      if(customers.length === 0) {
+        listEl.innerHTML = '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Henüz kayıtlı müşteri yok.</div>';
+        return;
+      }
+      listEl.innerHTML = customers.map(c => `
+        <div class="customer-item">
+          <div class="customer-info">
+            <strong>${c.name}</strong>
+            <span>📞 ${c.phone} | 📍 ${c.address}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderCustomerSelect() {
+      const selectEl = document.getElementById('orderCustomerSelect');
+      selectEl.innerHTML = '<option value="">-- Müşteri Seçin --</option>' + 
+        customers.map(c => `<option value="${c.name}">${c.name} (${c.phone})</option>`).join('');
+    }
+
+    // Sipariş Hesaplama
+    function calculateOrder() {
+      const qty = parseFloat(document.getElementById('orderQty').value) || 0;
+      const unitPrice = parseFloat(document.getElementById('orderUnitPrice').value) || 0;
+      const kdvCheck = document.getElementById('orderKdvCheck').checked;
+
+      const subtotal = qty * unitPrice;
+      const kdv = kdvCheck ? subtotal * 0.20 : 0;
+      const total = subtotal + kdv;
+
+      document.getElementById('sumSubtotal').innerText = subtotal.toFixed(2) + ' TL';
+      document.getElementById('sumKdv').innerText = kdv.toFixed(2) + ' TL';
+      document.getElementById('sumTotal').innerText = total.toFixed(2) + ' TL';
+    }
+
+    function shareOrder() {
+      const cust = document.getElementById('orderCustomerSelect').value || 'Belirtilmedi';
+      const prod = document.getElementById('orderProductName').value || 'Ürün Belirtilmedi';
+      const qty = document.getElementById('orderQty').value;
+      const unitPrice = document.getElementById('orderUnitPrice').value;
+      const total = document.getElementById('sumTotal').innerText;
+
+      const text = `📋 SİPARİŞ ÖZETİ\n\n👤 Müşteri: ${cust}\n📦 Ürün: ${prod}\n🔢 Adet: ${qty}\n💰 Birim Fiyat: ${unitPrice} TL\n💵 Genel Toplam (KDV Dahil): ${total}`;
+
+      navigator.clipboard.writeText(text);
+      alert('Sipariş özeti panoya kopyalandı! WhatsApp veya SMS ile paylaşabilirsiniz:\n\n' + text);
+    }
+
     loadData();
+    renderCustomerList();
   </script>
 </body>
 </html>
