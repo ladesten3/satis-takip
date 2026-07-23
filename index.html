@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saha Satış & Canlı Stok Takip</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
+    body { background-color: #f4f6f8; color: #333; padding: 15px; }
+    .header { text-align: center; margin-bottom: 15px; }
+    .search-box { width: 100%; padding: 12px 15px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; outline: none; margin-bottom: 20px; }
+    .search-box:focus { border-color: #007bff; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+    .card { background: white; border-radius: 10px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 15px; }
+    .card img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; background: #eee; }
+    .card-info { flex: 1; }
+    .card-title { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+    .card-category { font-size: 12px; color: #666; margin-bottom: 5px; text-transform: uppercase; }
+    .card-price { color: #28a745; font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+    .badge { display: inline-block; padding: 4px 8px; font-size: 12px; border-radius: 4px; font-weight: bold; }
+    .in-stock { background-color: #e6f4ea; color: #1e7e34; }
+    .out-stock { background-color: #fce8e6; color: #d93025; }
+    .loading { text-align: center; font-size: 18px; color: #666; margin-top: 40px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h2>Saha Satış Kataloğu</h2>
+  </div>
+
+  <input type="text" id="searchInput" class="search-box" placeholder="Ürün adı veya kategori ara..." onkeyup="filterProducts()">
+
+  <div class="grid" id="productGrid">
+    <div class="loading">Ürünler ve canlı stok durumu yükleniyor...</div>
+  </div>
+
+  <script>
+    const sheetId = '1_5EKMvh2NNaNfa32OYWQJ75OJ9SYudUbViq4jiNj7jM';
+    const jsonUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+
+    let allProducts = [];
+
+    async function loadProductsFromSheets() {
+      try {
+        const response = await fetch(jsonUrl);
+        const text = await response.text();
+        
+        // Google Visualization JSON yanıtını temizle
+        const jsonString = text.substring(47, text.length - 2);
+        const data = JSON.parse(jsonString);
+        
+        const rows = data.table.rows;
+
+        allProducts = rows.map((row, index) => {
+          const c = row.c;
+          return {
+            id: index + 1,
+            name: c[0] ? c[0].v : 'İsimsiz Ürün',
+            category: c[1] ? c[1].v : 'Genel',
+            price: c[2] ? c[2].v + ' TL' : '0 TL',
+            stock: c[3] ? parseInt(c[3].v) : 0,
+            img: c[4] && c[4].v ? c[4].v : 'https://via.placeholder.com/150?text=Urun'
+          };
+        });
+
+        renderProducts(allProducts);
+      } catch (error) {
+        document.getElementById("productGrid").innerHTML = "<div class='loading'>Bağlantı sağlanamadı. Lütfen Google Sheets dosyanızda <b>Dosya > Paylaş > Web'de Yayınla</b> adımı yaptığınızdan emin olun.</div>";
+        console.error("Hata ayrıntısı:", error);
+      }
+    }
+
+    function renderProducts(items) {
+      const grid = document.getElementById("productGrid");
+      
+      if (items.length === 0) {
+        grid.innerHTML = "<div class='loading'>Tablonuzda henüz ürün bulunamadı.</div>";
+        return;
+      }
+
+      grid.innerHTML = "";
+      items.forEach(p => {
+        const isStock = p.stock > 0;
+        grid.innerHTML += `
+          <div class="card">
+            <img src="${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150?text=Urun'">
+            <div class="card-info">
+              <div class="card-category">${p.category}</div>
+              <div class="card-title">${p.name}</div>
+              <div class="card-price">${p.price}</div>
+              <span class="badge ${isStock ? 'in-stock' : 'out-stock'}">
+                ${isStock ? 'Stokta Var (' + p.stock + ' adet)' : 'Stok Tükendi'}
+              </span>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function filterProducts() {
+      const query = document.getElementById("searchInput").value.toLowerCase();
+      const filtered = allProducts.filter(p => 
+        p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query)
+      );
+      renderProducts(filtered);
+    }
+
+    // Sayfa açıldığında verileri yükle
+    loadProductsFromSheets();
+  </script>
+</body>
+</html>
