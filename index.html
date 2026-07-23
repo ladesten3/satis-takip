@@ -53,7 +53,7 @@
     /* Sipariş Sepet/Kalem Tablosu */
     .order-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     .order-table th { text-align: left; font-size: 12px; color: #64748b; padding: 8px; border-bottom: 1px solid #e2e8f0; }
-    .order-table td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+    .order-table td { padding: 12px 8px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
     .qty-controls { display: flex; align-items: center; gap: 6px; }
     .btn-qty { width: 26px; height: 26px; border: 1px solid #cbd5e1; background: white; border-radius: 4px; font-weight: bold; cursor: pointer; }
 
@@ -133,11 +133,7 @@
 
     <div class="card">
       <div class="card-title">2. Ürün Ekle (Kategoriden Tüm Ürünler)</div>
-      
-      <!-- Kategori Filtre Butonları -->
       <div class="category-pills" id="orderCategoryPills"></div>
-      
-      <!-- Seçili Kategorinin Ürünleri -->
       <div class="product-grid" id="orderProductGrid"></div>
     </div>
 
@@ -148,8 +144,8 @@
         <thead>
           <tr>
             <th>Ürün</th>
-            <th style="width: 90px;">Adet</th>
-            <th>Fiyat</th>
+            <th style="width: 90px; text-align: center;">Adet</th>
+            <th style="text-align: right;">Fiyat</th>
             <th style="width: 30px;"></th>
           </tr>
         </thead>
@@ -169,15 +165,15 @@
       <div class="summary-box">
         <div class="summary-row">
           <span>Ara Toplam:</span>
-          <span id="sumSubtotal">0.00 TL</span>
+          <span id="sumSubtotal">0 TL</span>
         </div>
         <div class="summary-row">
           <span>KDV Tutarı (%20):</span>
-          <span id="sumKdv">0.00 TL</span>
+          <span id="sumKdv">0 TL</span>
         </div>
         <div class="summary-row total">
           <span>Genel Toplam:</span>
-          <span id="sumTotal">0.00 TL</span>
+          <span id="sumTotal">0 TL</span>
         </div>
       </div>
 
@@ -191,8 +187,16 @@
 
     let catalogData = {};
     let customers = JSON.parse(localStorage.getItem('saved_customers') || '[]');
-    let cart = []; // { name, price, qty }
+    let cart = [];
     let selectedOrderCategory = '';
+
+    // Para birimini temiz ve okunaklı formatlayan yardımcı fonksiyon
+    function formatMoney(amount) {
+      return new Intl.NumberFormat('tr-TR', {
+        minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+        maximumFractionDigits: 2
+      }).format(amount) + ' TL';
+    }
 
     function switchTab(tabId, btn) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -206,7 +210,6 @@
       }
     }
 
-    // Google Sheets Verilerini Yükle
     async function loadData() {
       try {
         const response = await fetch(jsonUrl);
@@ -252,7 +255,7 @@
           grid.innerHTML += `
             <div class="prod-card">
               <strong>${prod.name}</strong>
-              <div class="price">${prod.price.toFixed(2)} TL</div>
+              <div class="price">${formatMoney(prod.price)}</div>
               <span style="font-size:11px; color:${prod.stock > 0 ? '#16a34a' : '#ef4444'}; font-weight:bold;">
                 ${prod.stock > 0 ? 'Stok: ' + prod.stock : 'Stok Tükendi'}
               </span>
@@ -280,7 +283,6 @@
       renderCatalog(filtered);
     }
 
-    // --- MÜŞTERİ YÖNETİMİ (KAYIT, GÜNCELLEME, SİLME) ---
     function saveCustomer() {
       const name = document.getElementById('custName').value.trim();
       const phone = document.getElementById('custPhone').value.trim();
@@ -293,14 +295,12 @@
       }
 
       if (editId) {
-        // Güncelleme Modu
         const index = customers.findIndex(c => c.id == editId);
         if (index !== -1) {
           customers[index] = { id: Number(editId), name, phone, address };
           alert('Müşteri bilgileri güncellendi.');
         }
       } else {
-        // Yeni Ekleme Modu
         customers.push({ id: Date.now(), name, phone, address });
         alert('Müşteri başarıyla kaydedildi.');
       }
@@ -369,7 +369,6 @@
         customers.map(c => `<option value="${c.name} (${c.phone})">${c.name} (${c.phone})</option>`).join('');
     }
 
-    // --- SİPARİŞ KATEGORİDEN ÇOKLU ÜRÜN SEÇİMİ VE SEPET ---
     function initOrderCatalog() {
       const pillsContainer = document.getElementById('orderCategoryPills');
       const categories = Object.keys(catalogData);
@@ -394,7 +393,7 @@
       grid.innerHTML = (catalogData[category] || []).map(p => `
         <div class="prod-card">
           <strong>${p.name}</strong>
-          <div class="price">${p.price.toFixed(2)} TL</div>
+          <div class="price">${formatMoney(p.price)}</div>
           <button class="btn-add" onclick="addToCart('${p.name}', ${p.price})">➕ Sepete Ekle</button>
         </div>
       `).join('');
@@ -438,15 +437,15 @@
         <tr>
           <td><strong>${item.name}</strong></td>
           <td>
-            <div class="qty-controls">
+            <div class="qty-controls" style="justify-content: center;">
               <button class="btn-qty" onclick="updateCartQty('${item.name}', -1)">-</button>
-              <span>${item.qty}</span>
+              <span style="font-weight: bold; width: 18px; text-align: center;">${item.qty}</span>
               <button class="btn-qty" onclick="updateCartQty('${item.name}', 1)">+</button>
             </div>
           </td>
-          <td>${(item.price * item.qty).toFixed(2)} TL</td>
-          <td>
-            <button style="border:none; background:none; cursor:pointer;" onclick="removeFromCart('${item.name}')">🗑️</button>
+          <td style="text-align: right; font-weight: 600; color: #1e293b;">${formatMoney(item.price * item.qty)}</td>
+          <td style="text-align: right;">
+            <button style="border:none; background:none; cursor:pointer; font-size: 15px;" onclick="removeFromCart('${item.name}')">🗑️</button>
           </td>
         </tr>
       `).join('');
@@ -460,9 +459,9 @@
       const kdv = kdvCheck ? subtotal * 0.20 : 0;
       const total = subtotal + kdv;
 
-      document.getElementById('sumSubtotal').innerText = subtotal.toFixed(2) + ' TL';
-      document.getElementById('sumKdv').innerText = kdv.toFixed(2) + ' TL';
-      document.getElementById('sumTotal').innerText = total.toFixed(2) + ' TL';
+      document.getElementById('sumSubtotal').innerText = formatMoney(subtotal);
+      document.getElementById('sumKdv').innerText = formatMoney(kdv);
+      document.getElementById('sumTotal').innerText = formatMoney(total);
     }
 
     function shareOrder() {
@@ -477,7 +476,7 @@
       }
 
       let itemsText = cart.map((item, idx) => 
-        `${idx + 1}. ${item.name} x ${item.qty} Adet = ${(item.price * item.qty).toFixed(2)} TL`
+        `${idx + 1}. ${item.name} x ${item.qty} Adet = ${formatMoney(item.price * item.qty)}`
       ).join('\n');
 
       const subtotal = document.getElementById('sumSubtotal').innerText;
