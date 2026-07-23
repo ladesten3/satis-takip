@@ -230,7 +230,7 @@
 
   <div id="myOrdersTab" class="tab-content">
     <div class="card">
-      <div class="card-title">📦 Verilen Siparişler & Sevkiyat Takibi <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">(Detay için tıklayın)</span></div>
+      <div class="card-title">📦 Verilen Siparişler & Sevkiyat Takibi <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">(Düzenlemek için tıklayın)</span></div>
       <div id="myOrdersList"><div class="loading">Yükleniyor...</div></div>
     </div>
   </div>
@@ -583,7 +583,7 @@
           ordersListEl.innerHTML = mySales.map((s) => {
             const globalIdx = salesData.indexOf(s);
             return `
-              <div class="report-item" style="border-left: 4px solid var(--primary);" onclick="showSaleModal(${globalIdx})">
+              <div class="report-item" style="border-left: 4px solid var(--primary);" onclick="showOrderEditModal(${globalIdx})">
                 <div class="report-header">
                   <span>🏢 ${s.musteri}</span>
                   <span style="color:var(--success); font-weight:bold;">${formatMoney(s.tutar)}</span>
@@ -591,7 +591,7 @@
                 <div style="font-size:12px; color:#334155; margin: 4px 0;">📦 <strong>Sipariş:</strong> ${s.ozet}</div>
                 <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 6px;">
                   <span>🚚 Teslimat: <strong>${s.teslimatTarihi}</strong></span>
-                  <span>🕒 İşlem: ${s.tarih}</span>
+                  <span style="color:var(--primary); font-weight:bold;">✏️ Düzenle / İptal Et</span>
                 </div>
               </div>
             `;
@@ -783,6 +783,39 @@
         <div class="detail-row"><div class="detail-label">SİPARİŞ ONAY ZAMANI</div><div class="detail-value" style="font-size:12px; color:var(--text-muted);">🕒 ${s.tarih}</div></div>
       `;
       openModal('📋 Resmi Sipariş & Sevkiyat Formu', content);
+    }
+
+    function showOrderEditModal(idx) {
+      const s = salesData[idx];
+      if (!s) return;
+      const sheetRowNumber = idx + 2; // Başlık satırı + 1 tablodaki index farkı
+
+      const content = `
+        <div class="detail-row"><div class="detail-label">MÜŞTERİ</div><div class="detail-value">🏢 ${s.musteri}</div></div>
+        <div class="detail-row"><div class="detail-label">MEVCUT SİPARİŞ</div><div class="detail-value" style="color:var(--success);">${s.ozet}</div></div>
+        <div class="detail-row"><div class="detail-label">TOPLAM TUTAR</div><div class="detail-value" style="font-weight:bold; font-size:16px;">${formatMoney(s.tutar)}</div></div>
+        <div class="detail-row"><div class="detail-label">TESLİMAT TARİHİ</div><div class="detail-value">🚚 ${s.teslimatTarihi}</div></div>
+        
+        <div style="background:#f8fafc; padding:15px; border-radius:12px; border:1px solid var(--border-color); margin-top:15px;">
+          <h4 style="font-size:13px; margin-bottom:8px; color:var(--text-main);">⚠️ Sipariş İptali veya Güncelleme</h4>
+          <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Müşteri üründe değişiklik yapmak veya siparişi iptal etmek istiyorsa bu kaydı silebilir, ardından **Sipariş Ver** sekmesinden güncel halini tekrar girebilirsiniz.</p>
+          <button class="btn-main btn-danger" onclick="deleteOrder(${sheetRowNumber})">🗑️ Bu Siparişi Komple İptal Et / Sil</button>
+        </div>
+      `;
+      openModal('📦 Sipariş Düzenleme & İptal', content);
+    }
+
+    async function deleteOrder(rowNum) {
+      if(!confirm('Bu siparişi tamamen silmek ve iptal etmek istediğinize emin misiniz? (Cirodan da düşecektir)')) return;
+
+      try {
+        await fetch(`${appsScriptUrl}?action=deleteSale&row=${rowNum}`);
+        alert('Sipariş başarıyla iptal edildi ve silindi.');
+        closeModal();
+        loadSales();
+      } catch(err) {
+        alert('Silme sırasında hata oluştu: ' + err);
+      }
     }
 
     function initOrderCatalog() {
