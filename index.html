@@ -66,6 +66,10 @@
 
     .loading { text-align: center; font-size: 13px; color: #64748b; padding: 15px; }
 
+    /* Ciro Özet Kartları */
+    .revenue-summary-card { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+    .revenue-summary-card .rev-val { font-size: 20px; font-weight: 800; color: #4ade80; }
+
     /* MODAL (Büyük Detay Ekranı) CSS */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 999; justify-content: center; align-items: center; padding: 15px; }
     .modal-card { background: white; border-radius: 16px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; padding: 22px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); position: relative; animation: modalFadeIn 0.2s ease-out; }
@@ -221,17 +225,38 @@
   <div id="mudurTab" class="tab-content">
     <div class="card" style="border: 2px solid #f59e0b; background: #fffbeb;">
       <div class="card-title" style="color: #b45309;">👑 Yönetici Özeti (Gökmen Yorulmaz)</div>
-      <p style="font-size:13px; color:#78350f;">Tüm ekibin saha performansını, ziyaret akışını ve toplam ciro hareketlerini görün. Detay için üzerlerine tıklayın.</p>
+      <p style="font-size:13px; color:#78350f;">Tüm ekibin saha performansını, danışman bazlı ayrıntılı ciroları ve ziyaret akışını görün. Detay için üzerlerine tıklayın.</p>
+    </div>
+
+    <!-- MERT KİTİR CİRO BÖLÜMÜ -->
+    <div class="revenue-summary-card">
+      <div>
+        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Mert Kitir - Toplam Ciro</div>
+        <div class="rev-val" id="mertTotalRev">0 TL</div>
+      </div>
+      <div style="font-size: 24px;">👤</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Mert Kitir - Satış & Ciro Kayıtları</div>
+      <div id="mertSalesList"><div class="loading">Yükleniyor...</div></div>
+    </div>
+
+    <!-- VOLKAN YAĞMUR CİRO BÖLÜMÜ -->
+    <div class="revenue-summary-card" style="background: linear-gradient(135deg, #0f766e, #115e59);">
+      <div>
+        <div style="font-size: 12px; color: #99f6e4; text-transform: uppercase; font-weight: 700;">Volkan Yağmur - Toplam Ciro</div>
+        <div class="rev-val" id="volkanTotalRev" style="color: #5eead4;">0 TL</div>
+      </div>
+      <div style="font-size: 24px;">👤</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Volkan Yağmur - Satış & Ciro Kayıtları</div>
+      <div id="volkanSalesList"><div class="loading">Yükleniyor...</div></div>
     </div>
 
     <div class="card">
       <div class="card-title">Tüm Saha Ekibi Görüşme Günlükleri</div>
       <div id="mudurVisitList"><div class="loading">Veriler yükleniyor...</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Gerçekleşen Satış & Ciro Kayıtları (Sipariş Formları)</div>
-      <div id="mudurSalesList"><div class="loading">Veriler yükleniyor...</div></div>
     </div>
   </div>
 
@@ -362,7 +387,7 @@
           </div>
           <div style="color:#64748b; font-size:12px; margin-top:4px;">📍 Adres: ${c.address || 'Adres Girilmedi'}</div>
           <div style="font-size:11px; color:#059669; font-weight:bold; margin-top:6px; background:#ecfdf5; padding:4px 8px; border-radius:4px; display:inline-block;">
-            👤 Danışman: ${c.danisman || 'Genel'}
+            👤 Danışman: ${c.danisman || 'Genel'} (Düzenlemek İçin Tıklayın)
           </div>
         </div>
       `).join('');
@@ -447,7 +472,8 @@
 
     async function loadMudurData() {
       const visitEl = document.getElementById('mudurVisitList');
-      const salesEl = document.getElementById('mudurSalesList');
+      const mertSalesEl = document.getElementById('mertSalesList');
+      const volkanSalesEl = document.getElementById('volkanSalesList');
 
       const resV = await fetch(`${appsScriptUrl}?action=getVisits&danisman=MUDUR`);
       visitsData = await resV.json();
@@ -465,13 +491,37 @@
       salesData = await resS.json();
       salesData.reverse();
 
-      salesEl.innerHTML = salesData.map((s, idx) => `
-        <div class="report-item" style="border-left: 4px solid #16a34a;" onclick="showSaleModal(${idx})">
-          <div class="report-header"><span>👤 Danışman: <strong>${s.danisman}</strong> | Müşteri: ${s.musteri}</span><span style="color:#16a34a; font-weight:bold;">${formatMoney(s.tutar)}</span></div>
-          <div style="font-size:12px; color:#475569;">📦 Ürünler: ${s.ozet}</div>
-          <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${s.tarih} (Sipariş Formunu Görmek İçin Tıklayın)</div>
-        </div>
-      `).join('');
+      // Mert Kitir Satışları ve Toplamı
+      const mertSales = salesData.filter(s => s.danisman === 'Mert Kitir');
+      const mertTotal = mertSales.reduce((sum, s) => sum + (parseFloat(s.tutar) || 0), 0);
+      document.getElementById('mertTotalRev').innerText = formatMoney(mertTotal);
+
+      mertSalesEl.innerHTML = mertSales.length > 0 ? mertSales.map((s, idx) => {
+        const globalIdx = salesData.indexOf(s);
+        return `
+          <div class="report-item" style="border-left: 4px solid #2563eb;" onclick="showSaleModal(${globalIdx})">
+            <div class="report-header"><span>🏢 Müşteri: ${s.musteri}</span><span style="color:#16a34a; font-weight:bold;">${formatMoney(s.tutar)}</span></div>
+            <div style="font-size:12px; color:#475569;">📦 Ürünler: ${s.ozet}</div>
+            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${s.tarih} (Detay için tıklayın)</div>
+          </div>
+        `;
+      }).join('') : '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Mert Kitir için ciro kaydı bulunmuyor.</div>';
+
+      // Volkan Yağmur Satışları ve Toplamı
+      const volkanSales = salesData.filter(s => s.danisman === 'Volkan Yağmur');
+      const volkanTotal = volkanSales.reduce((sum, s) => sum + (parseFloat(s.tutar) || 0), 0);
+      document.getElementById('volkanTotalRev').innerText = formatMoney(volkanTotal);
+
+      volkanSalesEl.innerHTML = volkanSales.length > 0 ? volkanSales.map((s, idx) => {
+        const globalIdx = salesData.indexOf(s);
+        return `
+          <div class="report-item" style="border-left: 4px solid #0d9488;" onclick="showSaleModal(${globalIdx})">
+            <div class="report-header"><span>🏢 Müşteri: ${s.musteri}</span><span style="color:#16a34a; font-weight:bold;">${formatMoney(s.tutar)}</span></div>
+            <div style="font-size:12px; color:#475569;">📦 Ürünler: ${s.ozet}</div>
+            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${s.tarih} (Detay için tıklayın)</div>
+          </div>
+        `;
+      }).join('') : '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Volkan Yağmur için ciro kaydı bulunmuyor.</div>';
     }
 
     // --- MODAL / POP-UP FONKSİYONLARI ---
@@ -510,8 +560,49 @@
         <div class="detail-row"><div class="detail-label">TELEFON NUMARASI</div><div class="detail-value">📞 ${c.phone}</div></div>
         <div class="detail-row"><div class="detail-label">AÇIK ADRES</div><div class="detail-value">📍 ${c.address || 'Adres Girilmemiş'}</div></div>
         <div class="detail-row"><div class="detail-label">İLGİLİ SATIŞ DANIŞMANI</div><div class="detail-value">👤 ${c.danisman || 'Genel'}</div></div>
+        
+        <div style="margin-top: 15px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
+          <h4 style="font-size: 13px; margin-bottom: 8px; color: #0f172a;">✏️ Müşteri Bilgilerini Düzenle</h4>
+          <div class="form-group">
+            <label>Yeni Firma Adı</label>
+            <input type="text" id="editCustName" class="form-control" value="${c.name}">
+          </div>
+          <div class="form-group">
+            <label>Yeni Telefon</label>
+            <input type="text" id="editCustPhone" class="form-control" value="${c.phone}">
+          </div>
+          <div class="form-group">
+            <label>Yeni Adres</label>
+            <textarea id="editCustAddress" class="form-control" rows="2">${c.address || ''}</textarea>
+          </div>
+          <button class="btn-main" onclick="updateCustomer('${c.name}')">Değişiklikleri Kaydet</button>
+        </div>
       `;
-      openModal('👤 Müşteri Kayıt Kartı', content);
+      openModal('👤 Müşteri Kayıt Kartı & Düzenleme', content);
+    }
+
+    async function updateCustomer(oldName) {
+      const newName = document.getElementById('editCustName').value.trim();
+      const newPhone = document.getElementById('editCustPhone').value.trim();
+      const newAddress = document.getElementById('editCustAddress').value.trim();
+
+      if (!newName || !newPhone) {
+        alert('Firma adı ve telefon boş bırakılamaz.');
+        return;
+      }
+
+      const queryParams = new URLSearchParams({
+        action: 'addCustomer', name: newName, phone: newPhone, address: newAddress, danisman: currentUser
+      }).toString();
+
+      try {
+        await fetch(`${appsScriptUrl}?${queryParams}`, { method: 'GET', mode: 'no-cors' });
+        alert('Müşteri bilgileri güncellendi!');
+        closeModal();
+        setTimeout(loadCustomers, 1000);
+      } catch (err) {
+        alert('Güncelleme hatası: ' + err);
+      }
     }
 
     function showSaleModal(idx) {
