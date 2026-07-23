@@ -258,7 +258,12 @@
   <div id="mudurTab" class="tab-content">
     <div class="card" style="border: 2px solid #f59e0b; background: #fffbeb;">
       <div class="card-title" style="color: #b45309;">👑 Yönetici Özeti (Gökmen Yorulmaz)</div>
-      <p style="font-size:13px; color:#78350f;">Tüm ekibin saha performansını, danışman bazlı ayrıntılı ciroları ve sipariş/ziyaret akışını görün.</p>
+      <p style="font-size:13px; color:#78350f;">Tüm ekibin saha performansını, danışman bazlı ayrıntılı ciroları, müşteri listelerini ve ziyaret akışını görün.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👥 Tüm Ekip Müşteri Dağılımı</div>
+      <div id="mudurCustomerList"><div class="loading">Yükleniyor...</div></div>
     </div>
 
     <div class="revenue-summary-card">
@@ -421,30 +426,39 @@
       const listEl = document.getElementById('customerList');
       const titleEl = document.getElementById('customerListTitle');
       
+      let filteredCustomers = customers;
       if (currentUser === 'MUDUR') {
         titleEl.innerText = "🌐 Tüm Müşteri Listesi (Yönetici Görünümü)";
       } else {
         titleEl.innerText = `👤 ${currentUser} - Müşteri Listesi`;
+        filteredCustomers = customers.filter(c => c.danisman === currentUser || !c.danisman || c.danisman === 'Genel');
       }
 
-      if (!customers || customers.length === 0) {
+      if (!filteredCustomers || filteredCustomers.length === 0) {
         listEl.innerHTML = '<div style="font-size: 13px; color: var(--text-muted); text-align: center;">Kayıtlı müşteri bulunamadı.</div>';
         return;
       }
 
-      listEl.innerHTML = customers.map((c, idx) => `
-        <div class="report-item" onclick="showCustomerModal(${idx})">
-          <div class="report-header">
-            <span>🏢 ${c.name}</span>
-            <span style="color:var(--primary); font-weight:bold;">📞 ${c.phone}</span>
+      listEl.innerHTML = filteredCustomers.map((c) => {
+        const originalIdx = customers.indexOf(c);
+        return `
+          <div class="report-item" onclick="showCustomerModal(${originalIdx})">
+            <div class="report-header">
+              <span>🏢 ${c.name} ${currentUser === 'MUDUR' ? '<span style="font-size:11px; color:var(--primary);">(' + c.danisman + ')</span>' : ''}</span>
+              <span style="color:var(--primary); font-weight:bold;">📞 ${c.phone}</span>
+            </div>
+            <div style="color:var(--text-muted); font-size:12px; margin-top:4px;">📍 Adres: ${c.address || 'Adres Girilmedi'}</div>
           </div>
-          <div style="color:var(--text-muted); font-size:12px; margin-top:4px;">📍 Adres: ${c.address || 'Adres Girilmedi'}</div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function renderCustomerSelect() {
-      const options = '<option value="">-- Müşteri Seçin --</option>' + customers.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+      let allowedCustomers = customers;
+      if (currentUser !== 'MUDUR') {
+        allowedCustomers = customers.filter(c => c.danisman === currentUser || !c.danisman || c.danisman === 'Genel');
+      }
+      const options = '<option value="">-- Müşteri Seçin --</option>' + allowedCustomers.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
       document.getElementById('visitCustomerSelect').innerHTML = options;
       document.getElementById('orderCustomerSelect').innerHTML = options;
     }
@@ -546,7 +560,6 @@
         document.getElementById('myTotalRev').innerText = formatMoney(totalRev);
         document.getElementById('myRevTitle').innerText = `${currentUser} - Toplam Ciro`;
 
-        // Ciro listesi
         const listEl = document.getElementById('mySalesList');
         if(!mySales || mySales.length === 0) {
           listEl.innerHTML = '<div style="font-size: 13px; color: var(--text-muted); text-align: center;">Henüz ciro kaydınız bulunmuyor.</div>';
@@ -563,7 +576,6 @@
           }).join('');
         }
 
-        // Siparişlerim sekmesi
         const ordersListEl = document.getElementById('myOrdersList');
         if(!mySales || mySales.length === 0) {
           ordersListEl.innerHTML = '<div style="font-size: 13px; color: var(--text-muted); text-align: center;">Verilmiş aktif sipariş bulunmuyor.</div>';
@@ -593,6 +605,19 @@
       const visitEl = document.getElementById('mudurVisitList');
       const mertSalesEl = document.getElementById('mertSalesList');
       const volkanSalesEl = document.getElementById('volkanSalesList');
+      const mudurCustEl = document.getElementById('mudurCustomerList');
+
+      const resC = await fetch(`${appsScriptUrl}?action=getCustomers`);
+      customers = await resC.json();
+      mudurCustEl.innerHTML = customers.length > 0 ? customers.map((c) => {
+        const originalIdx = customers.indexOf(c);
+        return `
+          <div class="report-item" onclick="showCustomerModal(${originalIdx})">
+            <div class="report-header"><span>🏢 ${c.name}</span><span style="color:var(--primary); font-weight:bold;">👤 ${c.danisman || 'Genel'}</span></div>
+            <div style="font-size:12px; color:var(--text-muted);">📞 ${c.phone} | 📍 ${c.address || 'Adres Yok'}</div>
+          </div>
+        `;
+      }).join('') : '<div style="font-size: 13px; color: var(--text-muted); text-align: center;">Kayıtlı müşteri bulunmuyor.</div>';
 
       const resV = await fetch(`${appsScriptUrl}?action=getVisits`);
       visitsData = await resV.json();
