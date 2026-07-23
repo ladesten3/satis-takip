@@ -30,6 +30,8 @@
     .form-control { width: 100%; padding: 10px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: #fff; }
     
     .btn-main { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; }
+    .btn-danger { background: #dc2626; color: white; }
+    .btn-danger:hover { background: #b91c1c; }
     
     /* Durum Etiketleri */
     .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
@@ -61,8 +63,8 @@
     .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
     .summary-row.total { font-size: 16px; font-weight: bold; color: #0f172a; border-top: 1px solid #cbd5e1; padding-top: 8px; }
 
-    .kdv-toggle { display: flex; gap: 15px; margin: 10px 0; background: #edf2f7; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; }
-    .kdv-toggle label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+    .kdv-toggle { display: flex; gap: 15px; margin: 10px 0; background: #edf2f7; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; align-items: center; }
+    .kdv-toggle label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 
     .loading { text-align: center; font-size: 13px; color: #64748b; padding: 15px; }
 
@@ -99,11 +101,12 @@
 
   <!-- Navigasyon Sekmeleri -->
   <div class="nav-tabs">
-    <button class="nav-btn active" onclick="switchTab('visitTab', this)">📍 Görüşme/Ziyaret Ekle</button>
-    <button class="nav-btn" onclick="switchTab('customerTab', this)">👤 Müşterilerim</button>
-    <button class="nav-btn" onclick="switchTab('orderTab', this)">📝 Sipariş Oluştur</button>
+    <button class="nav-btn active" onclick="switchTab('visitTab', this)">📍 Görüşme/Ziyaret</button>
+    <button class="nav-btn" onclick="switchTab('customerTab', this)">👤 Müşteriler</button>
+    <button class="nav-btn" onclick="switchTab('orderTab', this)">📝 Sipariş & Ciro</button>
     <button class="nav-btn" onclick="switchTab('catalogTab', this)">📦 Katalog</button>
-    <button class="nav-btn" id="mudurTabBtn" onclick="switchTab('mudurTab', this)" style="display:none; background:#fef3c7; color:#b45309;">📊 Müdür Raporu</button>
+    <button class="nav-btn" id="revenueTabBtn" onclick="switchTab('revenueTab', this)" style="display:none; background:#ecfdf5; color:#047857;">💰 Ciro Panelim</button>
+    <button class="nav-btn" id="mudurTabBtn" onclick="switchTab('mudurTab', this)" style="display:none; background:#fef3c7; color:#b45309;">👑 Müdür Raporu</button>
   </div>
 
   <!-- SEKME 1: ZİYARET RAPORU -->
@@ -126,8 +129,8 @@
       </div>
 
       <div class="form-group">
-        <label>Verilen Fiyat / Teklif Tutarı (Varsa)</label>
-        <input type="text" id="visitPrice" class="form-control" placeholder="Örn: 15.500 TL teklif verildi">
+        <label>Verilen Fiyat / Teklif Tutarı (Sadece Sayısal TL, Örn: 15500)</label>
+        <input type="number" id="visitPrice" class="form-control" placeholder="Örn: 15500">
       </div>
 
       <div class="form-group">
@@ -165,6 +168,7 @@
 
     <div class="card">
       <div class="card-title" id="customerListTitle">Kayıtlı Müşteri Listesi</div>
+      <div style="font-size:12px; color:#64748b; margin-bottom:10px;">💡 Düzenlemek veya silmek istediğiniz müşterinin kartına tıklayın.</div>
       <div id="customerList"><div class="loading">Yükleniyor...</div></div>
     </div>
   </div>
@@ -185,10 +189,9 @@
     <div class="card">
       <div class="card-title">3. Sipariş Kalemleri & KDV Ayarı</div>
       
-      <!-- KDV HARIÇ / DAHIL SEÇİMİ -->
+      <!-- TEK KUTUPLU KDV SEÇENEĞİ -->
       <div class="kdv-toggle">
-        <label><input type="radio" name="kdvMode" value="HARIC" checked onchange="renderCartTable()"> KDV Hariç Hesapla (%20 Ekle)</label>
-        <label><input type="radio" name="kdvMode" value="DAHIL" onchange="renderCartTable()"> KDV Dahil (Fiyatlara Dahil)</label>
+        <label><input type="checkbox" id="kdvCheck" onchange="renderCartTable()"> %20 KDV Dahil Hesapla</label>
       </div>
 
       <table class="order-table">
@@ -206,8 +209,8 @@
       </table>
 
       <div class="summary-box">
-        <div class="summary-row"><span>Ara Toplam:</span><span id="sumSubtotal">0 TL</span></div>
-        <div class="summary-row"><span>KDV (%20):</span><span id="sumKdv">0 TL</span></div>
+        <div class="summary-row" id="subtotalRow" style="display:none;"><span>Ara Toplam (Kdvsiz):</span><span id="sumSubtotal">0 TL</span></div>
+        <div class="summary-row" id="kdvRow" style="display:none;"><span>KDV (%20):</span><span id="sumKdv">0 TL</span></div>
         <div class="summary-row total"><span>Genel Toplam:</span><span id="sumTotal">0 TL</span></div>
       </div>
 
@@ -215,17 +218,33 @@
     </div>
   </div>
 
-  <!-- SEKME 4: KATALOG -->
+  <!-- SEKME 4: DANIŞMAN CİRO PANELİM -->
+  <div id="revenueTab" class="tab-content">
+    <div class="revenue-summary-card">
+      <div>
+        <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 700;" id="myRevTitle">Toplam Ciro</div>
+        <div class="rev-val" id="myTotalRev">0 TL</div>
+      </div>
+      <div style="font-size: 24px;">📈</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Sipariş & Ciro Geçmişim <span style="font-size:11px; font-weight:normal; color:#64748b;">(Detay için tıklayın)</span></div>
+      <div id="mySalesList"><div class="loading">Yükleniyor...</div></div>
+    </div>
+  </div>
+
+  <!-- SEKME 5: KATALOG -->
   <div id="catalogTab" class="tab-content">
     <div class="card"><input type="text" id="searchInput" class="form-control" placeholder="Ürün ara..." onkeyup="filterCatalog()"></div>
     <div id="catalogContainer"><div class="loading">Katalog yükleniyor...</div></div>
   </div>
 
-  <!-- SEKME 5: MÜDÜR PANELİ -->
+  <!-- SEKME 6: MÜDÜR PANELİ -->
   <div id="mudurTab" class="tab-content">
     <div class="card" style="border: 2px solid #f59e0b; background: #fffbeb;">
       <div class="card-title" style="color: #b45309;">👑 Yönetici Özeti (Gökmen Yorulmaz)</div>
-      <p style="font-size:13px; color:#78350f;">Tüm ekibin saha performansını, danışman bazlı ayrıntılı ciroları ve ziyaret akışını görün. Detay için üzerlerine tıklayın.</p>
+      <p style="font-size:13px; color:#78350f;">Tüm ekibin saha performansını, danışman bazlı ayrıntılı ciroları ve ziyaret akışını görün.</p>
     </div>
 
     <!-- MERT KİTİR CİRO BÖLÜMÜ -->
@@ -282,7 +301,8 @@
     let currentUser = localStorage.getItem('active_user') || 'Mert Kitir';
 
     function formatMoney(amount) {
-      return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: amount % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 }).format(amount) + ' TL';
+      const num = parseFloat(amount) || 0;
+      return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(num) + ' TL';
     }
 
     document.getElementById('currentUserSelect').value = currentUser;
@@ -292,10 +312,14 @@
       localStorage.setItem('active_user', currentUser);
       
       const mudurBtn = document.getElementById('mudurTabBtn');
+      const revenueBtn = document.getElementById('revenueTabBtn');
+
       if (currentUser === 'MUDUR') {
         mudurBtn.style.display = 'block';
+        revenueBtn.style.display = 'none';
       } else {
         mudurBtn.style.display = 'none';
+        revenueBtn.style.display = 'block';
       }
 
       document.getElementById('customerList').innerHTML = '<div class="loading">Yükleniyor...</div>';
@@ -303,6 +327,7 @@
 
       loadCustomers();
       loadVisits();
+      loadSales();
       if (currentUser === 'MUDUR') loadMudurData();
     }
 
@@ -313,6 +338,7 @@
       btn.classList.add('active');
       
       if(tabId === 'orderTab') { renderCustomerSelect(); initOrderCatalog(); }
+      if(tabId === 'revenueTab') { loadSales(); }
       if(tabId === 'mudurTab') { loadMudurData(); }
     }
 
@@ -371,7 +397,7 @@
       if (currentUser === 'MUDUR') {
         titleEl.innerText = "🌐 Tüm Müşteri Listesi (Yönetici Görünümü)";
       } else {
-        titleEl.innerText = `👤 ${currentUser} - Özel Müşteri Listesi`;
+        titleEl.innerText = `👤 ${currentUser} - Müşteri Listesi`;
       }
 
       if (!customers || customers.length === 0) {
@@ -386,9 +412,6 @@
             <span style="color:#2563eb; font-weight:bold;">📞 ${c.phone}</span>
           </div>
           <div style="color:#64748b; font-size:12px; margin-top:4px;">📍 Adres: ${c.address || 'Adres Girilmedi'}</div>
-          <div style="font-size:11px; color:#059669; font-weight:bold; margin-top:6px; background:#ecfdf5; padding:4px 8px; border-radius:4px; display:inline-block;">
-            👤 Danışman: ${c.danisman || 'Genel'} (Düzenlemek İçin Tıklayın)
-          </div>
         </div>
       `).join('');
     }
@@ -426,7 +449,8 @@
     async function saveVisitReport() {
       const musteri = document.getElementById('visitCustomerSelect').value;
       const durum = document.getElementById('visitStatus').value;
-      const fiyat = document.getElementById('visitPrice').value.trim();
+      const rawPrice = document.getElementById('visitPrice').value.trim();
+      const fiyat = rawPrice ? `${rawPrice} TL` : '';
       const notlar = document.getElementById('visitNotes').value.trim();
 
       if (!musteri || !notlar) { alert('Lütfen müşteri seçip görüşme notunu yazın.'); return; }
@@ -463,10 +487,41 @@
               <span class="badge ${v.durum.includes('Olumlu') ? 'badge-olumlu' : v.durum.includes('Teklif') ? 'badge-teklif' : 'badge-olumsuz'}">${v.durum}</span>
             </div>
             <div style="margin: 6px 0; color:#334155;">💬 <strong>Görüşme Notu:</strong> ${v.notlar}</div>
-            ${v.fiyat ? `<div style="color:#16a34a; font-weight:bold; font-size:12px;">💰 Verilen Fiyat: ${v.fiyat}</div>` : ''}
+            ${v.fiyat ? `<div style="color:#16a34a; font-weight:bold; font-size:12px;">💰 Teklif: ${v.fiyat}</div>` : ''}
             <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${v.tarih} | Danışman: ${v.danisman}</div>
           </div>
         `).join('');
+      } catch(e) {}
+    }
+
+    async function loadSales() {
+      if(currentUser === 'MUDUR') return;
+      try {
+        const res = await fetch(`${appsScriptUrl}?action=getSales&danisman=MUDUR`);
+        salesData = await res.json();
+        salesData.reverse();
+
+        const mySales = salesData.filter(s => s.danisman === currentUser);
+        const totalRev = mySales.reduce((sum, s) => sum + (parseFloat(s.tutar) || 0), 0);
+        document.getElementById('myTotalRev').innerText = formatMoney(totalRev);
+        document.getElementById('myRevTitle').innerText = `${currentUser} - Toplam Ciro`;
+
+        const listEl = document.getElementById('mySalesList');
+        if(!mySales || mySales.length === 0) {
+          listEl.innerHTML = '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Henüz ciro kaydınız bulunmuyor.</div>';
+          return;
+        }
+
+        listEl.innerHTML = mySales.map((s, idx) => {
+          const globalIdx = salesData.indexOf(s);
+          return `
+            <div class="report-item" style="border-left: 4px solid #16a34a;" onclick="showSaleModal(${globalIdx})">
+              <div class="report-header"><span>🏢 Müşteri: ${s.musteri}</span><span style="color:#16a34a; font-weight:bold;">${formatMoney(s.tutar)}</span></div>
+              <div style="font-size:12px; color:#475569;">📦 Ürünler: ${s.ozet}</div>
+              <div style="font-size:11px; color:#94a3b8; margin-top:4px;">🕒 ${s.tarih} (Sipariş Formu İçin Tıklayın)</div>
+            </div>
+          `;
+        }).join('');
       } catch(e) {}
     }
 
@@ -545,7 +600,7 @@
         <div class="detail-row"><div class="detail-label">FİRMA TELEFONU</div><div class="detail-value">📞 ${custObj.phone || 'Sistemde Telefon Yok'}</div></div>
         <div class="detail-row"><div class="detail-label">SATIŞ DANIŞMANI</div><div class="detail-value">👤 ${v.danisman}</div></div>
         <div class="detail-row"><div class="detail-label">GÖRÜŞME DURUMU</div><div class="detail-value">${v.durum}</div></div>
-        <div class="detail-row"><div class="detail-label">VERİLEN TEKLİF / FİYAT</div><div class="detail-value" style="color:#16a34a;">${v.fiyat || 'Teklif Verilmedi'}</div></div>
+        <div class="detail-row"><div class="detail-label">TEKLİF TUTARI</div><div class="detail-value" style="color:#16a34a;">${v.fiyat || 'Teklif Verilmedi'}</div></div>
         <div class="detail-row"><div class="detail-label">GÖRÜŞME NOTLARI & DETAY</div><div class="detail-value" style="background:#f8fafc; padding:10px; border-radius:8px; font-weight:normal;">${v.notlar}</div></div>
         <div class="detail-row"><div class="detail-label">İŞLEM TARİHİ</div><div class="detail-value" style="font-size:12px; color:#64748b;">🕒 ${v.tarih}</div></div>
       `;
@@ -577,8 +632,12 @@
           </div>
           <button class="btn-main" onclick="updateCustomer('${c.name}')">Değişiklikleri Kaydet</button>
         </div>
+
+        <div style="margin-top: 15px; text-align: right;">
+          <button class="btn-main btn-danger" style="width: auto; padding: 8px 16px; font-size: 12px;" onclick="deleteCustomer('${c.name}')">🗑️ Müşteriyi Sil</button>
+        </div>
       `;
-      openModal('👤 Müşteri Kayıt Kartı & Düzenleme', content);
+      openModal('👤 Müşteri İşlem Kartı', content);
     }
 
     async function updateCustomer(oldName) {
@@ -591,6 +650,7 @@
         return;
       }
 
+      // Eski kaydı silip yenisini ekleme mantığıyla Sheets'te güncelleme simülasyonu
       const queryParams = new URLSearchParams({
         action: 'addCustomer', name: newName, phone: newPhone, address: newAddress, danisman: currentUser
       }).toString();
@@ -602,6 +662,23 @@
         setTimeout(loadCustomers, 1000);
       } catch (err) {
         alert('Güncelleme hatası: ' + err);
+      }
+    }
+
+    async function deleteCustomer(name) {
+      if (!confirm(`"${name}" isimli müşteriyi silmek istediğinize emin misiniz?`)) return;
+      
+      const queryParams = new URLSearchParams({
+        action: 'deleteCustomer', name: name
+      }).toString();
+
+      try {
+        await fetch(`${appsScriptUrl}?${queryParams}`, { method: 'GET', mode: 'no-cors' });
+        alert('Müşteri sistemden silindi.');
+        closeModal();
+        setTimeout(loadCustomers, 1000);
+      } catch (err) {
+        alert('Silme sırasında hata: ' + err);
       }
     }
 
@@ -675,18 +752,20 @@
       `).join('');
 
       let baseSum = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-      const isKdvHaric = document.querySelector('input[name="kdvMode"]:checked').value === 'HARIC';
+      const isKdvDahil = document.getElementById('kdvCheck').checked;
 
       let subtotal, kdv, total;
 
-      if (isKdvHaric) {
+      if (isKdvDahil) {
+        total = baseSum * 1.20;
         subtotal = baseSum;
-        kdv = subtotal * 0.20;
-        total = subtotal + kdv;
+        kdv = total - subtotal;
+        document.getElementById('subtotalRow').style.display = 'flex';
+        document.getElementById('kdvRow').style.display = 'flex';
       } else {
         total = baseSum;
-        subtotal = total / 1.20;
-        kdv = total - subtotal;
+        document.getElementById('subtotalRow').style.display = 'none';
+        document.getElementById('kdvRow').style.display = 'none';
       }
 
       document.getElementById('sumSubtotal').innerText = formatMoney(subtotal);
@@ -701,8 +780,8 @@
       if (!cust || cart.length === 0) { alert('Müşteri ve en az 1 ürün seçmelisiniz.'); return; }
       
       let baseSum = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-      const isKdvHaric = document.querySelector('input[name="kdvMode"]:checked').value === 'HARIC';
-      const finalTotal = isKdvHaric ? (baseSum * 1.20) : baseSum;
+      const isKdvDahil = document.getElementById('kdvCheck').checked;
+      const finalTotal = isKdvDahil ? (baseSum * 1.20) : baseSum;
 
       const ozet = cart.map(i => `${i.name} (${i.qty} Adet)`).join(', ');
 
