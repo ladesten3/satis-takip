@@ -31,8 +31,6 @@
     
     .btn-main { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
     .btn-main:hover { background: #1d4ed8; }
-    .btn-danger { background: #ef4444; color: white; border: none; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; }
-    .btn-edit { background: #f59e0b; color: white; border: none; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; }
 
     /* Müşteri Listesi */
     .customer-item { padding: 14px; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
@@ -92,8 +90,7 @@
   <!-- SEKME 2: MÜŞTERİ YÖNETİMİ -->
   <div id="customerTab" class="tab-content">
     <div class="card">
-      <div class="card-title" id="custFormTitle">Yeni Müşteri Ekle</div>
-      <input type="hidden" id="editCustId" value="">
+      <div class="card-title">Yeni Müşteri Ekle (Ortak Buluta Kayıt)</div>
       
       <div class="form-group">
         <label>Firma / Müşteri Adı *</label>
@@ -108,14 +105,11 @@
         <textarea id="custAddress" class="form-control" rows="2" placeholder="Firma açık adresi..."></textarea>
       </div>
       
-      <div style="display: flex; gap: 10px;">
-        <button class="btn-main" id="btnSaveCust" onclick="saveCustomer()">Müşteriyi Kaydet</button>
-        <button class="btn-main" id="btnCancelEdit" style="background:#64748b; display:none;" onclick="resetCustForm()">İptal</button>
-      </div>
+      <button class="btn-main" id="btnSaveCust" onclick="saveCustomer()">Müşteriyi Kaydet</button>
     </div>
 
     <div class="card">
-      <div class="card-title">Kayıtlı Müşteriler</div>
+      <div class="card-title">Kayıtlı Müşteriler (Google Tablodan Canlı)</div>
       <div id="customerList"><div class="loading">Müşteriler yükleniyor...</div></div>
     </div>
   </div>
@@ -184,13 +178,13 @@
   <script>
     const sheetId = '1_5EKMvh2NNaNfa32OYWQJ75OJ9SYudUbViq4jiNj7jM';
     const jsonUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+    const appsScriptUrl = 'https://script.google.com/macros/s/AKfycbwWqdoVkZzZXcwLNH6EQvWMrQU9prObrLTRHk-OS4K0T-MkXLO-ZklNGurvcwwB2dhN/exec';
 
     let catalogData = {};
-    let customers = JSON.parse(localStorage.getItem('saved_customers') || '[]');
+    let customers = [];
     let cart = [];
     let selectedOrderCategory = '';
 
-    // Para birimini temiz ve okunaklı formatlayan yardımcı fonksiyon
     function formatMoney(amount) {
       return new Intl.NumberFormat('tr-TR', {
         minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
@@ -283,70 +277,59 @@
       renderCatalog(filtered);
     }
 
-    function saveCustomer() {
+    // --- MÜŞTERİ YÖNETİMİ (GOOGLE SHEETS BULUT CANLI BAĞLANTI) ---
+    async function loadCustomers() {
+      const listEl = document.getElementById('customerList');
+      listEl.innerHTML = '<div class="loading">Müşteri listesi Google Tablodan yükleniyor...</div>';
+      try {
+        const res = await fetch(appsScriptUrl);
+        customers = await res.json();
+        renderCustomerList();
+      } catch (e) {
+        listEl.innerHTML = '<div style="color:#ef4444; font-size:13px; text-align:center;">Müşteriler çekilemedi.</div>';
+      }
+    }
+
+    async function saveCustomer() {
       const name = document.getElementById('custName').value.trim();
       const phone = document.getElementById('custPhone').value.trim();
       const address = document.getElementById('custAddress').value.trim();
-      const editId = document.getElementById('editCustId').value;
 
       if (!name || !phone) {
         alert('Lütfen Firma Adı ve Telefon alanlarını doldurun.');
         return;
       }
 
-      if (editId) {
-        const index = customers.findIndex(c => c.id == editId);
-        if (index !== -1) {
-          customers[index] = { id: Number(editId), name, phone, address };
-          alert('Müşteri bilgileri güncellendi.');
-        }
-      } else {
-        customers.push({ id: Date.now(), name, phone, address });
-        alert('Müşteri başarıyla kaydedildi.');
+      const btn = document.getElementById('btnSaveCust');
+      btn.disabled = true;
+      btn.innerText = 'Kaydediliyor...';
+
+      try {
+        await fetch(appsScriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add', name, phone, address })
+        });
+
+        alert('Müşteri Google Tablosuna kaydedildi!');
+        document.getElementById('custName').value = '';
+        document.getElementById('custPhone').value = '';
+        document.getElementById('custAddress').value = '';
+        
+        setTimeout(loadCustomers, 1000); // Müşteri listesini yenile
+      } catch (e) {
+        alert('Kaydedilirken hata oluştu.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Müşteriyi Kaydet';
       }
-
-      localStorage.setItem('saved_customers', JSON.stringify(customers));
-      resetCustForm();
-      renderCustomerList();
-    }
-
-    function editCustomer(id) {
-      const cust = customers.find(c => c.id == id);
-      if (!cust) return;
-
-      document.getElementById('editCustId').value = cust.id;
-      document.getElementById('custName').value = cust.name;
-      document.getElementById('custPhone').value = cust.phone;
-      document.getElementById('custAddress').value = cust.address || '';
-
-      document.getElementById('custFormTitle').innerText = 'Müşteri Bilgilerini Güncelle';
-      document.getElementById('btnSaveCust').innerText = 'Değişiklikleri Kaydet';
-      document.getElementById('btnCancelEdit').style.display = 'block';
-    }
-
-    function deleteCustomer(id) {
-      if (confirm('Bu müşteriyi silmek istediğinizden emin misiniz?')) {
-        customers = customers.filter(c => c.id != id);
-        localStorage.setItem('saved_customers', JSON.stringify(customers));
-        renderCustomerList();
-      }
-    }
-
-    function resetCustForm() {
-      document.getElementById('editCustId').value = '';
-      document.getElementById('custName').value = '';
-      document.getElementById('custPhone').value = '';
-      document.getElementById('custAddress').value = '';
-
-      document.getElementById('custFormTitle').innerText = 'Yeni Müşteri Ekle';
-      document.getElementById('btnSaveCust').innerText = 'Müşteriyi Kaydet';
-      document.getElementById('btnCancelEdit').style.display = 'none';
     }
 
     function renderCustomerList() {
       const listEl = document.getElementById('customerList');
-      if (customers.length === 0) {
-        listEl.innerHTML = '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Henüz kayıtlı müşteri bulunmuyor.</div>';
+      if (!customers || customers.length === 0) {
+        listEl.innerHTML = '<div style="font-size: 13px; color: #94a3b8; text-align: center;">Kayıtlı müşteri bulunamadı.</div>';
         return;
       }
       listEl.innerHTML = customers.map(c => `
@@ -354,10 +337,6 @@
           <div class="customer-info">
             <strong>${c.name}</strong>
             <span>📞 ${c.phone} ${c.address ? '| 📍 ' + c.address : ''}</span>
-          </div>
-          <div style="display:flex; gap:6px;">
-            <button class="btn-edit" onclick="editCustomer(${c.id})">✏️ Düzenle</button>
-            <button class="btn-danger" onclick="deleteCustomer(${c.id})">🗑️ Sil</button>
           </div>
         </div>
       `).join('');
@@ -490,7 +469,7 @@
     }
 
     loadData();
-    renderCustomerList();
+    loadCustomers();
   </script>
 </body>
 </html>
