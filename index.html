@@ -332,25 +332,29 @@
       const btn = document.getElementById('btnSaveCust');
       btn.disabled = true; btn.innerText = 'Kaydediliyor...';
 
-      const formData = new URLSearchParams();
-      formData.append('action', 'addCustomer');
-      formData.append('name', name);
-      formData.append('phone', phone);
-      formData.append('address', address);
-      formData.append('danisman', currentUser);
+      const payload = {
+        action: 'addCustomer',
+        name: name,
+        phone: phone,
+        address: address,
+        danisman: currentUser
+      };
 
       try {
         await fetch(appsScriptUrl, {
           method: 'POST',
-          body: formData
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
         });
-        alert('Müşteri eklendi!');
+        
+        alert('Müşteri kaydı gönderildi!');
         document.getElementById('custName').value = '';
         document.getElementById('custPhone').value = '';
         document.getElementById('custAddress').value = '';
-        setTimeout(loadCustomers, 1000);
+        setTimeout(loadCustomers, 1500);
       } catch (err) {
-        alert('Ekleme sırasında hata oluştu: ' + err);
+        alert('Hata oluştu: ' + err);
       } finally {
         btn.disabled = false; btn.innerText = 'Müşteriyi Veritabanına Ekle';
       }
@@ -367,23 +371,26 @@
       const btn = document.getElementById('btnSaveVisit');
       btn.disabled = true; btn.innerText = 'Kaydediliyor...';
 
-      const formData = new URLSearchParams();
-      formData.append('action', 'addVisit');
-      formData.append('danisman', currentUser);
-      formData.append('musteri', musteri);
-      formData.append('durum', durum);
-      formData.append('fiyat', fiyat);
-      formData.append('notlar', notlar);
+      const payload = {
+        action: 'addVisit',
+        danisman: currentUser,
+        musteri: musteri,
+        durum: durum,
+        fiyat: fiyat,
+        notlar: notlar
+      };
 
       try {
         await fetch(appsScriptUrl, {
           method: 'POST',
-          body: formData
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
         });
-        alert('Ziyaret raporu başarıyla kaydedildi!');
+        alert('Ziyaret raporu kaydedildi!');
         document.getElementById('visitPrice').value = '';
         document.getElementById('visitNotes').value = '';
-        setTimeout(loadVisits, 1000);
+        setTimeout(loadVisits, 1500);
       } catch (err) {
         alert('Kayıt hatası: ' + err);
       } finally {
@@ -489,16 +496,19 @@
       const sub = cart.reduce((s, i) => s + (i.price * i.qty), 0) * 1.20;
       const ozet = cart.map(i => `${i.name} (${i.qty} Adet)`).join(', ');
 
-      const formData = new URLSearchParams();
-      formData.append('action', 'addSale');
-      formData.append('danisman', currentUser);
-      formData.append('musteri', cust);
-      formData.append('tutar', sub);
-      formData.append('ozet', ozet);
+      const payload = {
+        action: 'addSale',
+        danisman: currentUser,
+        musteri: cust,
+        tutar: sub,
+        ozet: ozet
+      };
 
       await fetch(appsScriptUrl, {
         method: 'POST',
-        body: formData
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
       });
 
       alert('Sipariş onaylandı ve ciro paneline işlendi!');
